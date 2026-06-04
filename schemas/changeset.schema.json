@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.local/schemas/changeset.schema.json",
+  "title": "AI Engineering ChangeSet",
+  "type": "object",
+  "required": [
+    "change_id",
+    "task_id",
+    "role",
+    "agent",
+    "diff_hash",
+    "risk_level",
+    "rollback_plan",
+    "timestamp"
+  ],
+  "properties": {
+    "change_id": { "type": "string" },
+    "task_id": { "type": ["string", "null"] },
+    "requirement_id": { "type": ["string", "null"] },
+    "decision_id": { "type": ["string", "null"] },
+    "role": { "type": "string" },
+    "agent": { "type": "string" },
+    "prompt_ref": { "type": ["string", "null"] },
+    "context_ref": { "type": ["string", "null"] },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "diff_hash": { "type": "string" },
+    "commands_run": { "type": "array", "items": { "type": "string" } },
+    "tests_run": { "type": "array", "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "review_refs": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "type": "string" },
+    "rollback_plan": { "type": "string" },
+    "timestamp": { "type": "string" }
+  }
+}

@@ -1,0 +1,21 @@
+.DS_Store
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local runtime state generated when this tool is used against a repository.
+.ai-engineering/
+docs/ai-artifacts/
+
+# Test and build output.
+coverage/
+dist/
+build/
+.nyc_output/
+
+# Local environment.
+.env
+.env.*
+!.env.example

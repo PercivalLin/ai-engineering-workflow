@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.local/schemas/decision.schema.json",
+  "title": "AI Engineering User Decision",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "question",
+    "recommended_option",
+    "alternatives",
+    "default_assumption",
+    "affected_roles",
+    "affected_gates",
+    "status"
+  ],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "task_id": { "type": ["string", "null"] },
+    "topic": { "type": "string" },
+    "impact": { "type": "string" },
+    "question": { "type": "string" },
+    "recommended_option": { "type": "string" },
+    "alternatives": { "type": "array", "items": { "type": "string" } },
+    "default_assumption": { "type": "string" },
+    "affected_roles": { "type": "array", "items": { "type": "string" } },
+    "affected_gates": { "type": "array", "items": { "type": "string" } },
+    "status": { "type": "string" },
+    "answer": { "type": "string" }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.local/schemas/evidence.schema.json",
+  "title": "AI Engineering Evidence",
+  "type": "object",
+  "required": ["evidence_id", "evidence_type", "outcome", "timestamp", "hash"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "task_id": { "type": ["string", "null"] },
+    "evidence_type": { "type": "string" },
+    "role": { "type": ["string", "null"] },
+    "agent": { "type": ["string", "null"] },
+    "outcome": { "type": "string" },
+    "summary": { "type": "string" },
+    "command": { "type": ["string", "null"] },
+    "stdout_ref": { "type": ["string", "null"] },
+    "artifact_refs": { "type": "array", "items": { "type": "string" } },
+    "related_changesets": { "type": "array", "items": { "type": "string" } },
+    "timestamp": { "type": "string" },
+    "hash": { "type": "string" }
+  }
+}
