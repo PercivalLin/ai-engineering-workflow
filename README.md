@@ -24,7 +24,7 @@ node ./bin/ai-engineering.mjs server
 The CLI exists for debugging and smoke tests:
 
 ```bash
-node ./bin/ai-engineering.mjs advance --title "Build product" --description "..."
+node ./bin/ai-engineering.mjs advance --goal "User product goal..."
 node ./bin/ai-engineering.mjs init
 node ./bin/ai-engineering.mjs create-goal --title "Build product" --description "..."
 node ./bin/ai-engineering.mjs scan
@@ -144,9 +144,9 @@ See [TESTING.md](./TESTING.md) for the experiment matrix that maps each public c
 
 Use `advance_workflow` as the normal entrypoint. The other tools are lower-level primitives used by the runtime and by advanced debugging.
 
-`advance_workflow` automatically:
+`advance_workflow` starts from a user-provided product goal, then automatically:
 
-- creates a goal if needed
+- registers the user's product goal as the active internal task
 - scans project context
 - retrieves global experience
 - asks only high-impact user questions

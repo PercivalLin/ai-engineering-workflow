@@ -11,6 +11,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
   await initProject(projectRoot);
   const maxSteps = Number(input.max_steps || input.maxSteps || 20);
   const adapter = input.adapter || "codex";
+  const productGoal = normalizeProductGoal(input);
   const actions = [];
 
   for (let step = 0; step < maxSteps; step += 1) {
@@ -18,18 +19,18 @@ export async function advanceWorkflow(projectRoot, input = {}) {
     let goal = activeGoal(state);
 
     if (!goal) {
-      if (!input.title && !input.description && !input.goal) {
+      if (!productGoal) {
         const result = {
-          status: "needs_goal",
-          reason: "No active goal exists. Provide title/description or call create_goal.",
+          status: "needs_product_goal",
+          reason: "No active user-provided product goal exists. Provide product_goal, title, description, or call create_goal with the user's goal.",
           actions
         };
         await recordAdvanceEvent(projectRoot, result);
         return result;
       }
       const created = await createGoal(projectRoot, {
-        title: input.title || input.goal || "Untitled goal",
-        description: input.description || input.goal || "",
+        title: input.title || firstLine(productGoal),
+        description: input.description || productGoal,
         risk_level: input.risk_level || input.risk || "medium",
         created_by: input.created_by || "advance_workflow"
       });
@@ -475,6 +476,16 @@ export async function runGate(projectRoot, input = {}) {
 
 function normalizeRole(role) {
   return String(role || "").toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function normalizeProductGoal(input) {
+  return [input.product_goal, input.productGoal, input.goal, input.description, input.title]
+    .map((value) => String(value || "").trim())
+    .find(Boolean) || "";
+}
+
+function firstLine(text) {
+  return String(text || "").split(/\r?\n/).find((line) => line.trim())?.trim() || "User product goal";
 }
 
 async function readLatestContext(projectRoot) {

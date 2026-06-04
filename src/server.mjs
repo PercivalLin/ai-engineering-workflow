@@ -10,8 +10,9 @@ const TOOLS = [
     description: "Automatically advance the workflow from the current state to the next user decision, external agent task, completion, or blocker. This is the primary high-level entrypoint.",
     inputSchema: objectSchema({
       project_root: stringSchema("Repository root."),
-      title: stringSchema("Goal title when no active goal exists."),
-      description: stringSchema("Goal description when no active goal exists."),
+      product_goal: stringSchema("User-provided product goal. Required when no active goal exists."),
+      title: stringSchema("Optional short title for the user-provided product goal."),
+      description: stringSchema("Optional detailed description for the user-provided product goal."),
       risk_level: stringSchema("low, medium, high, or critical."),
       adapter: stringSchema("Execution adapter for external agent tasks, such as codex or claude_code."),
       skip_questions: { type: "boolean", description: "Use conservative defaults instead of asking missing high-impact goal questions." },

@@ -48,6 +48,7 @@ async function main() {
 
   if (command === "advance") {
     printJson(await advanceWorkflow(projectRoot, {
+      product_goal: args.goal || args["product-goal"] || args.productGoal,
       title: args.title,
       description: args.description,
       risk_level: args.risk,
@@ -184,7 +185,7 @@ async function main() {
 
 Usage:
   ai-engineering server
-  ai-engineering advance --title "..." --description "..." --adapter codex
+  ai-engineering advance --goal "User product goal..." --adapter codex
   ai-engineering init
   ai-engineering create-goal --title "..." --description "..." --risk high
   ai-engineering scan

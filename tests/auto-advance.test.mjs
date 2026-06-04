@@ -7,12 +7,27 @@ import { readProjectState } from "../src/core/project.mjs";
 import { readJsonl } from "../src/core/fs-utils.mjs";
 import { makeFixtureProject } from "./helpers.mjs";
 
+test("advance_workflow refuses to invent a product goal", async () => {
+  const fixture = await makeFixtureProject("aiwf-auto-needs-goal-");
+  try {
+    const result = await advanceWorkflow(fixture.projectRoot, {});
+
+    assert.equal(result.status, "needs_product_goal");
+    assert.match(result.reason, /user-provided product goal/);
+
+    const state = await readProjectState(fixture.projectRoot);
+    assert.equal(state.active_task_id, null);
+    assert.equal(state.goals.length, 0);
+  } finally {
+    fixture.restoreEnv();
+  }
+});
+
 test("advance_workflow creates a goal, scans, retrieves memory, and asks only high-impact missing product decisions", async () => {
   const fixture = await makeFixtureProject("aiwf-auto-question-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
-      title: "Build automated planner",
-      description: "The workflow should plan and record by itself.",
+      product_goal: "Build an automated planner so the workflow can plan and record by itself.",
       risk_level: "high"
     });
 
@@ -35,8 +50,7 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
   const fixture = await makeFixtureProject("aiwf-auto-plan-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
-      title: "Build traceable delivery feature",
-      description: "Generate role plan and dispatch the developer without manual tool sequencing.",
+      product_goal: "Build a traceable delivery feature that generates a role plan and dispatches the developer without manual tool sequencing.",
       risk_level: "medium",
       skip_questions: true,
       adapter: "codex"

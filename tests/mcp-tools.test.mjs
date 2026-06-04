@@ -71,8 +71,7 @@ test("MCP server exposes and executes every planned tool", async () => {
 
     const auto = await mcp.tool("advance_workflow", {
       project_root: fixture.projectRoot,
-      title: "MCP auto workflow",
-      description: "The runtime should automate planning.",
+      product_goal: "The MCP runtime should automate planning from the user-provided product goal.",
       skip_questions: true
     });
     assert.equal(auto.status, "external_agent_required");
