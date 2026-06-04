@@ -51,6 +51,7 @@ test("MCP server exposes and executes every planned tool", async () => {
     const list = await mcp.call("tools/list");
     const toolNames = list.tools.map((item) => item.name).sort();
     assert.deepEqual(toolNames, [
+      "advance_workflow",
       "ask_user_decision",
       "create_goal",
       "dispatch_agent_task",
@@ -67,6 +68,14 @@ test("MCP server exposes and executes every planned tool", async () => {
       "run_gate",
       "scan_project_context"
     ].sort());
+
+    const auto = await mcp.tool("advance_workflow", {
+      project_root: fixture.projectRoot,
+      title: "MCP auto workflow",
+      description: "The runtime should automate planning.",
+      skip_questions: true
+    });
+    assert.equal(auto.status, "external_agent_required");
 
     const goal = await mcp.tool("create_goal", {
       project_root: fixture.projectRoot,

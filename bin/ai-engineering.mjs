@@ -3,7 +3,7 @@
 import { createGoal, initProject, readProjectState } from "../src/core/project.mjs";
 import { scanProjectContext } from "../src/core/context.mjs";
 import { retrieveGlobalExperience } from "../src/core/memory.mjs";
-import { getRoleAction, askUserDecision, recordUserDecision, dispatchAgentTask, runGate } from "../src/core/workflow.mjs";
+import { advanceWorkflow, getRoleAction, askUserDecision, recordUserDecision, dispatchAgentTask, runGate } from "../src/core/workflow.mjs";
 import { recordArtifact, recordBacklog, recordChangeset, recordEvidence, exportAuditBundle } from "../src/core/trace.mjs";
 import { startMcpServer } from "../src/server.mjs";
 
@@ -43,6 +43,18 @@ async function main() {
 
   if (command === "init") {
     printJson(await initProject(projectRoot));
+    return;
+  }
+
+  if (command === "advance") {
+    printJson(await advanceWorkflow(projectRoot, {
+      title: args.title,
+      description: args.description,
+      risk_level: args.risk,
+      adapter: args.adapter || "codex",
+      skip_questions: Boolean(args["skip-questions"] || args.skipQuestions),
+      max_steps: args.steps ? Number(args.steps) : undefined
+    }));
     return;
   }
 
@@ -172,6 +184,7 @@ async function main() {
 
 Usage:
   ai-engineering server
+  ai-engineering advance --title "..." --description "..." --adapter codex
   ai-engineering init
   ai-engineering create-goal --title "..." --description "..." --risk high
   ai-engineering scan

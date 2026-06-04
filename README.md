@@ -24,6 +24,7 @@ node ./bin/ai-engineering.mjs server
 The CLI exists for debugging and smoke tests:
 
 ```bash
+node ./bin/ai-engineering.mjs advance --title "Build product" --description "..."
 node ./bin/ai-engineering.mjs init
 node ./bin/ai-engineering.mjs create-goal --title "Build product" --description "..."
 node ./bin/ai-engineering.mjs scan
@@ -33,6 +34,7 @@ node ./bin/ai-engineering.mjs export
 
 ## MCP Tools
 
+- `advance_workflow`
 - `create_goal`
 - `scan_project_context`
 - `retrieve_global_experience`
@@ -137,3 +139,17 @@ npm run smoke
 The implementation is dependency-light on purpose. The MCP server uses stdio JSON-RPC directly so the workflow kernel remains portable across agents.
 
 See [TESTING.md](./TESTING.md) for the experiment matrix that maps each public capability to executable tests.
+
+## Recommended Practice
+
+Use `advance_workflow` as the normal entrypoint. The other tools are lower-level primitives used by the runtime and by advanced debugging.
+
+`advance_workflow` automatically:
+
+- creates a goal if needed
+- scans project context
+- retrieves global experience
+- asks only high-impact user questions
+- records generated requirements, ADR, and backlog artifacts
+- dispatches the next execution role when code, verification, review, or learning needs an external agent
+- records every advancement in the trace ledger

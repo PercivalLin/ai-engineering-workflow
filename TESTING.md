@@ -15,6 +15,7 @@ npm run verify
 | Experiment | Covered capability | Evidence |
 | --- | --- | --- |
 | Core workflow lifecycle | project initialization, goal creation, context scan, experience retrieval, role packets, decisions, evidence, ChangeSets, dispatch, learning, sandbox promotion, gate, audit export | `tests/workflow.test.mjs` |
+| Automatic advancement | one high-level call plans/scans/retrieves/records artifacts until a user decision or external agent task is needed | `tests/auto-advance.test.mjs` |
 | MCP tool coverage | every MCP tool can be listed and executed through stdio JSON-RPC | `tests/mcp-tools.test.mjs` |
 | CLI smoke | debug CLI can run the operator workflow in an isolated repository | `tests/cli-smoke.test.mjs` |
 | Gate blocking | incomplete phases are blocked until required context, ChangeSets, and evidence exist | `tests/gates-and-trace.test.mjs` |
@@ -24,6 +25,7 @@ npm run verify
 ## Acceptance Mapping
 
 - MCP Server usable: verified by `tests/mcp-tools.test.mjs`.
+- Automatic planning and recording: verified by `tests/auto-advance.test.mjs`.
 - Agent adapters dispatch task packets: verified by `dispatch_agent_task` in `tests/workflow.test.mjs` and `tests/mcp-tools.test.mjs`.
 - Global Memory Store usable: verified by `retrieve_global_experience`, `propose_learning`, and `promote_or_rollback_rule`.
 - Workflow Runtime usable: verified by `run_gate` pass/fail cases.

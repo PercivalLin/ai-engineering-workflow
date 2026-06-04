@@ -1,10 +1,23 @@
 import { createGoal } from "./core/project.mjs";
 import { scanProjectContext } from "./core/context.mjs";
 import { retrieveGlobalExperience, proposeLearning, promoteOrRollbackRule } from "./core/memory.mjs";
-import { askUserDecision, dispatchAgentTask, getRoleAction, recordUserDecision, runGate } from "./core/workflow.mjs";
+import { advanceWorkflow, askUserDecision, dispatchAgentTask, getRoleAction, recordUserDecision, runGate } from "./core/workflow.mjs";
 import { exportAuditBundle, recordArtifact, recordBacklog, recordChangeset, recordEvidence } from "./core/trace.mjs";
 
 const TOOLS = [
+  {
+    name: "advance_workflow",
+    description: "Automatically advance the workflow from the current state to the next user decision, external agent task, completion, or blocker. This is the primary high-level entrypoint.",
+    inputSchema: objectSchema({
+      project_root: stringSchema("Repository root."),
+      title: stringSchema("Goal title when no active goal exists."),
+      description: stringSchema("Goal description when no active goal exists."),
+      risk_level: stringSchema("low, medium, high, or critical."),
+      adapter: stringSchema("Execution adapter for external agent tasks, such as codex or claude_code."),
+      skip_questions: { type: "boolean", description: "Use conservative defaults instead of asking missing high-impact goal questions." },
+      max_steps: numberSchema("Maximum automatic steps before returning.")
+    })
+  },
   {
     name: "create_goal",
     description: "Create a product goal or engineering task and initialize workflow state.",
@@ -182,6 +195,7 @@ const TOOLS = [
 ];
 
 const TOOL_HANDLERS = {
+  advance_workflow: (args) => advanceWorkflow(root(args), args),
   create_goal: (args) => createGoal(root(args), args),
   scan_project_context: (args) => scanProjectContext(root(args), args),
   retrieve_global_experience: (args) => retrieveGlobalExperience(root(args), args),
