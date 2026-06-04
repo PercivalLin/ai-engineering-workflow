@@ -75,27 +75,20 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         await recordAdvanceEvent(projectRoot, result);
         return result;
       }
-      if (shouldAskForGoalClarification(goal, input)) {
-        const decision = await askUserDecision(projectRoot, {
-          topic: !goal.target_users ? "target_users" : "success_metrics",
-          impact: "high"
-        });
-        actions.push({ action: "ask_user_decision", result: summarize(decision) });
-        const result = {
-          status: "user_input_required",
-          reason: "A high-impact product decision cannot be inferred safely.",
-          pending_decisions: [decision.decision],
-          actions
-        };
-        await recordAdvanceEvent(projectRoot, result);
-        return result;
-      }
       const gate = await runGate(projectRoot, { phase: "clarification_gate" });
       actions.push({ action: "run_gate", phase: "clarification_gate", result: summarize(gate) });
       continue;
     }
 
     if (state.current_phase === "requirements") {
+      const clarification = await maybeAskDiscoveredClarification(projectRoot, {
+        phase: "requirements",
+        goal,
+        context: await readLatestContext(projectRoot),
+        actions,
+        input
+      });
+      if (clarification) return clarification;
       const artifact = await recordArtifact(projectRoot, {
         artifact_type: "requirements",
         role: "pm",
@@ -110,6 +103,14 @@ export async function advanceWorkflow(projectRoot, input = {}) {
     }
 
     if (state.current_phase === "architecture") {
+      const clarification = await maybeAskDiscoveredClarification(projectRoot, {
+        phase: "architecture",
+        goal,
+        context: await readLatestContext(projectRoot),
+        actions,
+        input
+      });
+      if (clarification) return clarification;
       const artifact = await recordArtifact(projectRoot, {
         artifact_type: "adr",
         role: "architect",
@@ -124,6 +125,14 @@ export async function advanceWorkflow(projectRoot, input = {}) {
     }
 
     if (state.current_phase === "planning") {
+      const clarification = await maybeAskDiscoveredClarification(projectRoot, {
+        phase: "planning",
+        goal,
+        context: await readLatestContext(projectRoot),
+        actions,
+        input
+      });
+      if (clarification) return clarification;
       const backlog = await recordBacklog(projectRoot, {
         role: "delivery_manager",
         items: buildAutoBacklog(goal)
@@ -307,11 +316,6 @@ async function recordAdvanceEvent(projectRoot, result) {
   });
 }
 
-function shouldAskForGoalClarification(goal, input) {
-  if (input.skip_questions || input.skipQuestions) return false;
-  return !goal.target_users || !goal.success_metrics?.length;
-}
-
 function summarize(value) {
   if (!value || typeof value !== "object") return value;
   return {
@@ -486,6 +490,100 @@ function normalizeProductGoal(input) {
 
 function firstLine(text) {
   return String(text || "").split(/\r?\n/).find((line) => line.trim())?.trim() || "User product goal";
+}
+
+async function maybeAskDiscoveredClarification(projectRoot, { phase, goal, context, actions, input }) {
+  if (input.skip_questions || input.skipQuestions) return null;
+  const need = detectClarificationNeed({ phase, goal, context });
+  if (!need) return null;
+  const decision = await askUserDecision(projectRoot, need);
+  actions.push({ action: "ask_user_decision", phase, result: summarize(decision) });
+  const result = {
+    status: "user_input_required",
+    reason: `While working on ${phase}, the workflow discovered a high-impact ambiguity: ${need.topic}.`,
+    pending_decisions: [decision.decision],
+    actions
+  };
+  await recordAdvanceEvent(projectRoot, result);
+  return result;
+}
+
+function detectClarificationNeed({ phase, goal, context }) {
+  const text = `${goal.title || ""}\n${goal.description || ""}`.toLowerCase();
+  const compact = text.replace(/\s+/g, " ").trim();
+
+  if (phase === "requirements" && isTooVagueGoal(compact)) {
+    return {
+      topic: "product_scope",
+      impact: "high",
+      question: "The product goal is too broad to derive useful requirements. What concrete first outcome should this product deliver?",
+      recommended_option: "Define the first user-visible capability and one acceptance criterion.",
+      alternatives: ["Define a technical spike only", "Define a documentation-only discovery task"],
+      default_assumption: "Build the smallest demonstrable capability that proves the product direction.",
+      affected_roles: ["pm", "delivery_manager", "qa"],
+      affected_gates: ["requirements", "planning", "review_gate"]
+    };
+  }
+
+  if (phase === "requirements" && /(payment|billing|stripe|invoice|subscription|checkout|支付|计费|订阅|发票)/i.test(text)) {
+    return {
+      topic: "payment_compliance",
+      impact: "critical",
+      question: "This product goal appears to involve payment or billing. Which payment provider, compliance constraints, and success criteria should govern the first implementation?",
+      recommended_option: "Use a sandbox provider integration with no real charges until explicit approval.",
+      alternatives: ["Mock payment flow only", "Integrate a named provider with test credentials"],
+      default_assumption: "Do not process real payments; build only a mocked or sandboxed flow.",
+      affected_roles: ["pm", "architect", "security", "qa"],
+      affected_gates: ["requirements", "architecture", "verification_loop"]
+    };
+  }
+
+  if (phase === "architecture" && /(auth|login|oauth|sso|permission|rbac|认证|登录|权限|单点登录)/i.test(text)) {
+    return {
+      topic: "auth_security_model",
+      impact: "critical",
+      question: "This goal touches authentication or authorization. What identity provider, roles, and protected actions must the architecture support?",
+      recommended_option: "Use the existing project auth pattern if one is detected; otherwise require a minimal role model before implementation.",
+      alternatives: ["Use local-only mock auth", "Integrate a specified external identity provider"],
+      default_assumption: "Do not introduce production auth behavior until roles and protected actions are confirmed.",
+      affected_roles: ["architect", "security", "developer", "qa"],
+      affected_gates: ["architecture", "verification_loop", "review_gate"]
+    };
+  }
+
+  if (phase === "architecture" && /(delete|destructive|migration|migrate|schema|backfill|删除|迁移|数据结构|数据库)/i.test(text)) {
+    return {
+      topic: "data_migration_safety",
+      impact: "critical",
+      question: "This goal may affect persisted data. What data migration, retention, rollback, and compatibility constraints must be followed?",
+      recommended_option: "Use a backward-compatible migration with explicit rollback and validation evidence.",
+      alternatives: ["Prototype without touching persisted data", "Require a manual migration plan before code changes"],
+      default_assumption: "Do not perform destructive data changes; use reversible, additive changes only.",
+      affected_roles: ["architect", "developer", "qa", "sre"],
+      affected_gates: ["architecture", "verification_loop", "release_readiness"]
+    };
+  }
+
+  if (phase === "planning" && /(deploy|production|release|上线|发布|生产环境)/i.test(text) && !context?.ci_files?.length) {
+    return {
+      topic: "release_environment",
+      impact: "high",
+      question: "This goal mentions release or production, but no CI/release configuration was detected. What deployment environment and release approval path should be used?",
+      recommended_option: "Treat implementation as code-ready only and require explicit deployment evidence before release.",
+      alternatives: ["Add a new CI/release workflow", "Document manual deployment steps"],
+      default_assumption: "Do not deploy automatically; prepare release notes and rollback instructions only.",
+      affected_roles: ["delivery_manager", "sre", "trace_auditor"],
+      affected_gates: ["planning", "release_readiness", "archive"]
+    };
+  }
+
+  return null;
+}
+
+function isTooVagueGoal(text) {
+  if (!text || text.length < 20) return true;
+  const vagueOnly = /^(build|create|make|开发|做|创建|实现)\s*(an?|一个)?\s*(app|tool|system|platform|产品|工具|系统|平台)?\.?$/i;
+  return vagueOnly.test(text);
 }
 
 async function readLatestContext(projectRoot) {

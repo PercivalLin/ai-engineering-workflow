@@ -23,23 +23,44 @@ test("advance_workflow refuses to invent a product goal", async () => {
   }
 });
 
-test("advance_workflow creates a goal, scans, retrieves memory, and asks only high-impact missing product decisions", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-question-");
+test("advance_workflow does not ask unnecessary questions for a concrete product goal", async () => {
+  const fixture = await makeFixtureProject("aiwf-auto-no-question-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
-      product_goal: "Build an automated planner so the workflow can plan and record by itself.",
+      product_goal: "Build an automated planner that registers a user product goal, scans the repository, creates requirements and ADR artifacts, records backlog, and dispatches Codex for implementation.",
       risk_level: "high"
+    });
+
+    assert.equal(result.status, "external_agent_required");
+    assert.ok(result.actions.some((action) => action.action === "create_goal"));
+    assert.ok(result.actions.some((action) => action.action === "scan_project_context"));
+    assert.ok(result.actions.some((action) => action.action === "retrieve_global_experience"));
+    assert.ok(!result.actions.some((action) => action.action === "ask_user_decision"));
+
+    const state = await readProjectState(fixture.projectRoot);
+    assert.equal(state.current_phase, "build_loop");
+    assert.deepEqual(state.pending_decisions, []);
+  } finally {
+    fixture.restoreEnv();
+  }
+});
+
+test("advance_workflow stops to ask when a high-impact ambiguity is discovered during planning", async () => {
+  const fixture = await makeFixtureProject("aiwf-auto-discovered-question-");
+  try {
+    const result = await advanceWorkflow(fixture.projectRoot, {
+      product_goal: "Add production login and RBAC for admin users.",
+      risk_level: "critical"
     });
 
     assert.equal(result.status, "user_input_required");
     assert.equal(result.pending_decisions.length, 1);
-    assert.equal(result.pending_decisions[0].topic, "target_users");
-    assert.ok(result.actions.some((action) => action.action === "create_goal"));
-    assert.ok(result.actions.some((action) => action.action === "scan_project_context"));
-    assert.ok(result.actions.some((action) => action.action === "retrieve_global_experience"));
+    assert.equal(result.pending_decisions[0].topic, "auth_security_model");
+    assert.match(result.reason, /architecture/);
+    assert.ok(result.actions.some((action) => action.action === "record_artifact" && action.artifact_type === "requirements"));
 
     const state = await readProjectState(fixture.projectRoot);
-    assert.equal(state.current_phase, "clarification_gate");
+    assert.equal(state.current_phase, "architecture");
     assert.equal(state.pending_decisions[0].status, "pending");
   } finally {
     fixture.restoreEnv();

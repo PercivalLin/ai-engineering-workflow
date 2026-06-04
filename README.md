@@ -149,7 +149,7 @@ Use `advance_workflow` as the normal entrypoint. The other tools are lower-level
 - registers the user's product goal as the active internal task
 - scans project context
 - retrieves global experience
-- asks only high-impact user questions
+- asks only when it discovers a high-impact ambiguity during requirements, architecture, planning, verification, or release work
 - records generated requirements, ADR, and backlog artifacts
 - dispatches the next execution role when code, verification, review, or learning needs an external agent
 - records every advancement in the trace ledger

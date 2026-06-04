@@ -15,7 +15,7 @@ npm run verify
 | Experiment | Covered capability | Evidence |
 | --- | --- | --- |
 | Core workflow lifecycle | project initialization, goal creation, context scan, experience retrieval, role packets, decisions, evidence, ChangeSets, dispatch, learning, sandbox promotion, gate, audit export | `tests/workflow.test.mjs` |
-| Automatic advancement | one high-level call plans/scans/retrieves/records artifacts until a user decision or external agent task is needed | `tests/auto-advance.test.mjs` |
+| Automatic advancement | one high-level call plans/scans/retrieves/records artifacts, avoids unnecessary questions, and stops only when a discovered ambiguity is high-impact | `tests/auto-advance.test.mjs` |
 | MCP tool coverage | every MCP tool can be listed and executed through stdio JSON-RPC | `tests/mcp-tools.test.mjs` |
 | CLI smoke | debug CLI can run the operator workflow in an isolated repository | `tests/cli-smoke.test.mjs` |
 | Gate blocking | incomplete phases are blocked until required context, ChangeSets, and evidence exist | `tests/gates-and-trace.test.mjs` |
