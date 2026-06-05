@@ -1,0 +1,7 @@
+{
+  "project_root": "/absolute/path/to/target-product",
+  "product_goal": "Build a traceable task manager where users can create tasks, assign owners, record status changes, and export an audit trail.",
+  "adapter": "codex",
+  "risk_level": "medium",
+  "max_steps": 12
+}

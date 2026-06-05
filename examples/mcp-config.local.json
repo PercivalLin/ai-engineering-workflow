@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-engineering-workflow": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-engineering-workflow/bin/ai-engineering.mjs", "server"],
+      "env": {
+        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+      }
+    }
+  }
+}

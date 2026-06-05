@@ -24,6 +24,7 @@
     "test": "node --test",
     "verify": "npm run check && npm test",
     "pack:dry": "npm pack --dry-run",
+    "ci": "npm run verify && npm run pack:dry",
     "prepublishOnly": "npm run verify",
     "smoke": "node ./bin/ai-engineering.mjs init && node ./bin/ai-engineering.mjs create-goal --title \"Smoke goal\" --description \"Verify runtime wiring\" && node ./bin/ai-engineering.mjs scan && node ./bin/ai-engineering.mjs role --role pm && node ./bin/ai-engineering.mjs export"
   },
@@ -39,6 +40,8 @@
     "src",
     "schemas",
     "prompt-pack",
+    "docs",
+    "examples",
     "README.md",
     "TESTING.md",
     "CHANGELOG.md",

@@ -10,6 +10,14 @@ npm run verify
 
 `verify` runs syntax checks for every `.mjs` source/test file and then runs the Node test suite.
 
+For release-style local verification:
+
+```bash
+npm run ci
+```
+
+`ci` runs `verify` and then `npm pack --dry-run` so package contents are checked before publishing.
+
 ## Experiments
 
 | Experiment | Covered capability | Evidence |

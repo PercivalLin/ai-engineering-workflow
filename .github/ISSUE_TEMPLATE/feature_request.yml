@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a capability, adapter, role behavior, gate, memory feature, or documentation improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow, traceability, or agent coordination problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Workflow runtime
+        - MCP tools
+        - Agent adapters
+        - Global memory
+        - Traceability and audit
+        - Role prompts
+        - Documentation
+        - CI and publishing
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+  - type: textarea
+    id: traceability
+    attributes:
+      label: Traceability Impact
+      description: Does this affect ChangeSets, evidence, decision logs, gates, or audit bundles?

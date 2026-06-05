@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-engineering-workflow": {
+      "command": "npx",
+      "args": ["-y", "ai-engineering-workflow", "server"],
+      "env": {
+        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+      }
+    }
+  }
+}

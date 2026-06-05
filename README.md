@@ -43,6 +43,35 @@ The project is early alpha. The runtime is usable as a local MCP server and has 
 
 Use it first on non-critical repositories or small product slices.
 
+## Documentation
+
+| Link | Purpose |
+| --- | --- |
+| [Repository Structure](./docs/repository-structure.md) | Understand the source tree and where to add new work. |
+| [Architecture](./docs/architecture.md) | Understand the MCP server, runtime, memory store, trace ledger, and adapter boundary. |
+| [Workflow](./docs/workflow.md) | Understand phases, gates, stopping points, and progress feedback. |
+| [MCP Tools](./docs/mcp-tools.md) | Understand public tools and recommended call patterns. |
+| [Roles](./docs/roles.md) | Understand the virtual engineering team and role handoffs. |
+| [Data And Traceability](./docs/data-and-traceability.md) | Understand where logs are saved and how audit trails are built. |
+| [Publishing](./docs/publishing.md) | Prepare GitHub and npm releases. |
+| [Testing Matrix](./TESTING.md) | Map public capabilities to executable tests. |
+
+## Repository Layout
+
+```text
+.
+├── bin/                  # CLI entrypoint and MCP server launcher
+├── src/                  # Runtime source code
+│   ├── server.mjs        # Stdio JSON-RPC MCP server
+│   └── core/             # Workflow, memory, trace, context, and project modules
+├── schemas/              # JSON schemas for portable records
+├── prompt-pack/          # Prompt-only adapter guidance for non-MCP agents
+├── tests/                # Node test suite
+├── docs/                 # Long-form documentation
+├── examples/             # Copyable MCP configs and request examples
+└── .github/              # CI, issue templates, and pull request template
+```
+
 ## Installation
 
 ### From npm
@@ -338,19 +367,21 @@ These prompt packs tell the agent how to behave as one role in the virtual team 
 npm run check
 npm test
 npm run verify
+npm run ci
 npm run smoke
 ```
 
 The implementation is dependency-light on purpose. The MCP server uses stdio JSON-RPC directly so the workflow kernel remains portable across agent harnesses.
 
-See `TESTING.md` for the experiment matrix that maps public capabilities to executable tests.
+See `TESTING.md` for the experiment matrix that maps public capabilities to executable tests. See `docs/` for architecture, workflow, roles, data, and publishing guides.
 
 ## Release Checklist
 
 Before publishing:
 
 1. Create the public GitHub repository and update `package.json` with `repository`, `homepage`, and `bugs` URLs.
-2. Confirm the npm package name is available:
+2. Review `docs/` and `examples/` for stale placeholders.
+3. Confirm the npm package name is available:
 
 ```bash
 npm view ai-engineering-workflow version
@@ -358,7 +389,7 @@ npm view ai-engineering-workflow version
 
 An npm 404 usually means the package name is not currently published.
 
-3. Log in to npm:
+4. Log in to npm:
 
 ```bash
 npm adduser
@@ -367,19 +398,19 @@ npm whoami
 
 This package sets `publishConfig.registry` to the official npm registry so publishing does not accidentally target a local mirror.
 
-4. Run verification:
+5. Run verification:
 
 ```bash
-npm run verify
+npm run ci
 ```
 
-5. Review what will be published:
+6. Review what will be published:
 
 ```bash
 npm pack --dry-run
 ```
 
-6. Publish:
+7. Publish:
 
 ```bash
 npm publish
