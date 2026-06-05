@@ -21,6 +21,7 @@ Start with the root `README.md` if you are evaluating the project for the first 
 | File | Purpose |
 | --- | --- |
 | `README.md` | Public project homepage and quickstart. |
+| `README.zh-CN.md` | Chinese project homepage and quickstart. |
 | `TESTING.md` | Experiment matrix and verification coverage. |
 | `CHANGELOG.md` | Version history. |
 | `CONTRIBUTING.md` | Contribution rules and design principles. |

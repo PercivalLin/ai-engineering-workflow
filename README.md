@@ -1,6 +1,34 @@
-# AI Engineering Workflow
+<h1 align="center">AI Engineering Workflow</h1>
 
-Agent-neutral workflow runtime for turning Codex, Claude Code, Cursor, Gemini CLI, and similar coding agents into a traceable virtual engineering team.
+<p align="center">
+  <strong>Agent-neutral workflow runtime for turning AI coding agents into a traceable virtual engineering team.</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://www.npmjs.com/package/ai-engineering-workflow"><img alt="npm" src="https://img.shields.io/npm/v/ai-engineering-workflow.svg"></a>
+  <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="Node.js >=20" src="https://img.shields.io/badge/node-%3E%3D20-339933.svg">
+  <img alt="MCP" src="https://img.shields.io/badge/MCP-server-6f42c1.svg">
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a>
+  ·
+  <a href="#first-run">Quickstart</a>
+  ·
+  <a href="#mcp-tools">MCP Tools</a>
+  ·
+  <a href="./docs/architecture.md">Architecture</a>
+  ·
+  <a href="./README.zh-CN.md">中文</a>
+</p>
+
+<p align="center">
+  <sub>Works around Codex, Claude Code, Cursor, Gemini CLI, and other coding agents.</sub>
+</p>
+
+---
 
 AI Engineering Workflow is not another coding model. It is the engineering system around coding models: roles, gates, memory, questions, trace logs, evidence, ChangeSets, and audit bundles.
 
