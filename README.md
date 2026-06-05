@@ -1,73 +1,188 @@
 # AI Engineering Workflow
 
-AI Engineering Workflow is an agent-neutral runtime for turning Codex, Claude Code, Cursor, and similar coding agents into a traceable virtual engineering team.
+Agent-neutral workflow runtime for turning Codex, Claude Code, Cursor, Gemini CLI, and similar coding agents into a traceable virtual engineering team.
 
-The tool does not try to be the coding model. It provides the engineering system around coding models:
+AI Engineering Workflow is not another coding model. It is the engineering system around coding models: roles, gates, memory, questions, trace logs, evidence, ChangeSets, and audit bundles.
 
-- virtual team roles
-- automated workflow gates
-- global engineering memory
-- structured user-question protocol
-- trace ledger and ChangeSets
-- evidence recording
-- audit bundle export
-- MCP tools for agent integration
+## Why This Exists
 
-## Current Shape
+Modern coding agents can implement quickly, but they often miss the habits that make software engineering reliable:
 
-The main product surface is an MCP server:
+- clarify product intent only when the ambiguity matters
+- separate product, architecture, delivery, implementation, QA, security, review, and release responsibilities
+- keep changes small, reversible, and tied to requirements
+- record what was changed, by which agent, from which task packet, with which tests
+- learn reusable lessons across projects instead of only inside one repository
+
+This project gives agents a workflow kernel so they can act less like a single autocomplete session and more like a disciplined engineering team.
+
+## What It Provides
+
+- MCP server as the primary integration surface
+- automatic workflow advancement from a user-provided product goal
+- virtual team roles with role-specific prompts and artifact contracts
+- global engineering memory across projects
+- project-local trace ledger, decision log, evidence log, ChangeSets, and audit bundles
+- question protocol that explores first and asks only for high-impact unknowns
+- task packets for external execution agents
+- progress feedback fields so Codex, Claude Code, or another harness can tell the user who is active and what phase is running
+- prompt packs for agents that do not support MCP yet
+- lightweight CLI for debugging, smoke tests, and audit export
+
+## What It Is Not
+
+- It is not a replacement for Codex, Claude Code, Cursor, or Gemini CLI.
+- It does not own your source control or silently publish changes.
+- It does not invent the product goal. The user still gives the product objective.
+- It does not ask a fixed upfront questionnaire. It discovers ambiguity while working and pauses only for important decisions.
+- It does not treat generated logs as magic truth. Gates depend on recorded evidence.
+
+## Status
+
+The project is early alpha. The runtime is usable as a local MCP server and has executable tests for the current workflow kernel, but the external agent adapters are still task-packet based rather than fully autonomous process supervisors.
+
+Use it first on non-critical repositories or small product slices.
+
+## Installation
+
+### From npm
+
+After the package is published:
 
 ```bash
+npm install -g ai-engineering-workflow
+ai-engineering server
+```
+
+Or run it without a global install:
+
+```bash
+npx -y ai-engineering-workflow server
+```
+
+### From source
+
+```bash
+git clone <your-repository-url> ai-engineering-workflow
+cd ai-engineering-workflow
+npm run verify
 node ./bin/ai-engineering.mjs server
 ```
 
-The CLI exists for debugging and smoke tests:
+The package requires Node.js 20 or newer.
 
-```bash
-node ./bin/ai-engineering.mjs advance --goal "User product goal..."
-node ./bin/ai-engineering.mjs init
-node ./bin/ai-engineering.mjs create-goal --title "Build product" --description "..."
-node ./bin/ai-engineering.mjs scan
-node ./bin/ai-engineering.mjs role --role pm
-node ./bin/ai-engineering.mjs export
+## MCP Configuration
+
+Use the MCP server from npm:
+
+```json
+{
+  "mcpServers": {
+    "ai-engineering-workflow": {
+      "command": "npx",
+      "args": ["-y", "ai-engineering-workflow", "server"],
+      "env": {
+        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+      }
+    }
+  }
+}
 ```
 
-## MCP Tools
+Use the MCP server from a local checkout:
 
-- `advance_workflow`
-- `create_goal`
-- `scan_project_context`
-- `retrieve_global_experience`
-- `get_role_action`
-- `ask_user_decision`
-- `record_user_decision`
-- `dispatch_agent_task`
-- `record_changeset`
-- `record_artifact`
-- `record_backlog`
-- `record_evidence`
-- `run_gate`
-- `propose_learning`
-- `promote_or_rollback_rule`
-- `export_audit_bundle`
+```json
+{
+  "mcpServers": {
+    "ai-engineering-workflow": {
+      "command": "node",
+      "args": ["/absolute/path/to/Vibe-Engineering/bin/ai-engineering.mjs", "server"],
+      "env": {
+        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+      }
+    }
+  }
+}
+```
 
-## Virtual Team Roles
+`AI_ENGINEERING_HOME` is optional. If omitted, global memory is stored at `~/.ai-engineering`.
 
-- PM
-- Architect / Tech Lead
-- Delivery Manager
-- Developer
-- QA
-- Security
-- SRE / DevOps
-- Reviewer
-- Writer
-- Learning Coach
-- Trace Auditor
+## First Run
 
-Each role has a mission, required inputs, required outputs, and gates. Agents receive role task packets rather than free-form work.
+The normal entrypoint is `advance_workflow`.
 
-## Data Layout
+Give the agent a product goal, then let it call the MCP tool against the target repository:
+
+```json
+{
+  "project_root": "/absolute/path/to/target-product",
+  "product_goal": "Build a traceable task manager where users can create tasks, assign owners, record status changes, and export an audit trail.",
+  "adapter": "codex",
+  "risk_level": "medium"
+}
+```
+
+The runtime will:
+
+1. register the user-provided product goal
+2. scan the target repository
+3. retrieve relevant global engineering memory
+4. ask only if a discovered ambiguity affects product, architecture, cost, compliance, data, release, or acceptance criteria
+5. generate requirements, architecture notes, and backlog artifacts
+6. dispatch the next role task packet
+7. require evidence before gates pass
+8. record trace events and export an audit bundle
+
+For CLI debugging:
+
+```bash
+ai-engineering advance \
+  --project /absolute/path/to/target-product \
+  --goal "Build a traceable task manager..." \
+  --adapter codex
+```
+
+## Agent Progress Feedback
+
+MCP responses include progress fields that an agent harness can surface directly to the user:
+
+- `current_role`: active virtual team role, such as `developer` or `architect`
+- `current_phase`: workflow phase, such as `requirements`, `architecture`, or `build_loop`
+- `progress_message`: concise human-facing status
+- `agent_feedback_prompt`: instruction telling the execution agent how to explain the current status before continuing
+
+Example:
+
+```json
+{
+  "current_role": "developer",
+  "current_phase": "build_loop",
+  "status": "external_agent_required",
+  "progress_message": "[AI Engineering Workflow] Developer is active. Phase: build_loop. Status: external_agent_required.",
+  "agent_feedback_prompt": "You are currently acting as: Developer.\nWorkflow phase: build_loop.\nWorkflow status: external_agent_required.\nTell the user this status briefly before continuing."
+}
+```
+
+These fields are returned by `advance_workflow`, `get_role_action`, `dispatch_agent_task`, `ask_user_decision`, `record_user_decision`, and `run_gate`.
+
+## Logs And Data
+
+Project logs are stored inside the target product repository, not inside this tool repository unless this tool repository is the target.
+
+Project-local runtime state:
+
+```text
+<target-project>/.ai-engineering/project.yaml
+<target-project>/.ai-engineering/workflow-state.json
+<target-project>/.ai-engineering/trace-ledger.jsonl
+<target-project>/.ai-engineering/decision-log.jsonl
+<target-project>/.ai-engineering/evidence/
+<target-project>/.ai-engineering/changesets/
+<target-project>/.ai-engineering/context/
+<target-project>/.ai-engineering/context/task-packets/
+<target-project>/.ai-engineering/audit-bundles/
+<target-project>/docs/ai-artifacts/
+```
 
 Global memory:
 
@@ -77,93 +192,236 @@ Global memory:
 ~/.ai-engineering/memory/anti-patterns/
 ~/.ai-engineering/memory/cases/
 ~/.ai-engineering/memory/rules/
+~/.ai-engineering/memory/role-checklists/
+~/.ai-engineering/memory/stack-knowledge/
+~/.ai-engineering/memory/organization-preferences/
 ~/.ai-engineering/agents/
 ~/.ai-engineering/sandbox-rules/
 ```
 
-Project state:
+Useful inspection commands:
 
-```text
-.ai-engineering/project.yaml
-.ai-engineering/workflow-state.json
-.ai-engineering/trace-ledger.jsonl
-.ai-engineering/decision-log.jsonl
-.ai-engineering/evidence/
-.ai-engineering/changesets/
-.ai-engineering/context/
-docs/ai-artifacts/
+```bash
+tail -n 20 <target-project>/.ai-engineering/trace-ledger.jsonl
+tail -n 20 <target-project>/.ai-engineering/decision-log.jsonl
+find <target-project>/.ai-engineering -maxdepth 2 -type f | sort
+find ~/.ai-engineering -maxdepth 3 -type f | sort
 ```
 
-## Traceability
+## Virtual Team Roles
 
-Every modification should be recorded as a ChangeSet with:
+| Role | Responsibility | Primary outputs |
+| --- | --- | --- |
+| PM | clarify product goal, users, scope, priorities, acceptance criteria | PRD or lightweight spec, requirements, success criteria |
+| Architect / Tech Lead | design technical approach, interfaces, risks, migration, rollback | ADR, interface contract, risk register |
+| Delivery Manager | break work into small batches and keep gates moving | backlog, task queue, Definition of Ready, Definition of Done |
+| Developer | implement focused, traceable code changes | code, tests, ChangeSet, implementation notes |
+| QA | verify acceptance, regression, edge, and failure paths | test matrix, test evidence, failure reproduction |
+| Security | check threats, dependencies, secrets, permissions, data risk | security review, risk findings, evidence |
+| SRE / DevOps | check CI, deployment, observability, SLO, rollback | release readiness, operational evidence |
+| Reviewer | independently review diff, architecture fit, tests, maintainability | review findings, approval or blocker |
+| Writer | produce user/developer-facing delivery docs | README, API docs, changelog, release notes |
+| Learning Coach | convert evidence-backed outcomes into reusable memory | candidate playbooks, anti-patterns, policy rules |
+| Trace Auditor | verify traceability from goal to code to evidence to release | audit bundle, traceability matrix, missing-link findings |
 
-- task and decision links
-- role and execution agent
-- prompt and context refs
+Each role has a mission, principles, decision frameworks, artifact contract, quality bar, inputs, outputs, and gates in `src/core/defaults.mjs`.
+
+## Workflow
+
+The automated state machine follows this shape:
+
+1. Intake
+2. Context Scan
+3. Experience Retrieval
+4. Clarification Gate
+5. Requirements
+6. Architecture
+7. Planning
+8. Build Loop
+9. Verification Loop
+10. Review Gate
+11. Release Readiness
+12. Retro / Learn
+13. Archive
+
+`advance_workflow` moves through as many safe steps as it can, then stops at one of these boundaries:
+
+- user decision required
+- external agent task required
+- gate blocked
+- task complete
+- workflow cannot safely continue
+
+## Question Protocol
+
+The runtime should explore before asking.
+
+It should ask the user when ambiguity affects:
+
+- product goal, target user, or success criteria
+- architecture, cost, compliance, long-term maintenance, or user experience
+- data deletion, migration, compatibility, public API behavior, paid services, or release window
+- acceptance criteria that cannot be inferred from the repository or prior decisions
+
+It should not ask for:
+
+- facts discoverable from repository files, tests, README, CI, or package metadata
+- minor implementation details
+- code style choices already implied by the project
+- low-risk defaults
+
+Questions are recorded in the decision log with default assumptions and impact.
+
+## Traceability Model
+
+Every code modification should be recorded as a ChangeSet.
+
+A ChangeSet records:
+
+- `change_id`
+- `task_id`, `requirement_id`, or `decision_id`
+- initiating role
+- execution agent
+- task packet or prompt hash
+- context hash
 - changed files
 - diff hash
-- commands and tests
-- evidence and review refs
+- commands run
+- tests run
+- evidence refs
+- review refs
 - risk level
 - rollback plan
 - timestamp
 
-Audit bundles support both requirement-to-code and code-to-requirement tracing.
+This enables two directions of traceability:
 
-## Example MCP Config
+- requirement -> design -> task -> code -> tests -> review -> release
+- file change -> requirement -> decision -> agent -> evidence -> rollback
 
-Use a stdio MCP server command in any compatible agent:
+## MCP Tools
 
-```json
-{
-  "mcpServers": {
-    "ai-engineering-workflow": {
-      "command": "node",
-      "args": ["/Users/jochen/program/Vibe-Engineering/bin/ai-engineering.mjs", "server"],
-      "env": {
-        "AI_ENGINEERING_HOME": "/Users/jochen/.ai-engineering"
-      }
-    }
-  }
-}
+| Tool | Purpose |
+| --- | --- |
+| `advance_workflow` | high-level automatic workflow advancement |
+| `create_goal` | create a product goal or engineering task |
+| `scan_project_context` | scan repository facts and inferred test commands |
+| `retrieve_global_experience` | search global engineering memory |
+| `get_role_action` | get the next task packet for a role |
+| `ask_user_decision` | create a structured high-impact question |
+| `record_user_decision` | record a user answer |
+| `dispatch_agent_task` | create a task packet for Codex, Claude Code, Cursor, Gemini CLI, or another adapter |
+| `record_changeset` | record traceable modification metadata |
+| `record_artifact` | record requirements, ADRs, release notes, retros, or other artifacts |
+| `record_backlog` | record Delivery Manager backlog items |
+| `record_evidence` | record tests, scans, reviews, security checks, deployments, or manual evidence |
+| `run_gate` | run the current or selected phase gate |
+| `propose_learning` | create evidence-backed global memory candidates |
+| `promote_or_rollback_rule` | move rules through candidate, sandbox, default, or deprecated states |
+| `export_audit_bundle` | export timeline, decisions, evidence, ChangeSets, matrix, and summary |
+
+## Prompt Packs
+
+For agents or environments that cannot use MCP directly, see:
+
+```text
+prompt-pack/codex-skill.md
+prompt-pack/claude-code.md
+prompt-pack/generic-agent.md
 ```
+
+These prompt packs tell the agent how to behave as one role in the virtual team and what evidence it must return.
 
 ## Development
 
 ```bash
+npm run check
+npm test
 npm run verify
 npm run smoke
 ```
 
-The implementation is dependency-light on purpose. The MCP server uses stdio JSON-RPC directly so the workflow kernel remains portable across agents.
+The implementation is dependency-light on purpose. The MCP server uses stdio JSON-RPC directly so the workflow kernel remains portable across agent harnesses.
 
-See [TESTING.md](./TESTING.md) for the experiment matrix that maps each public capability to executable tests.
+See `TESTING.md` for the experiment matrix that maps public capabilities to executable tests.
 
-## Recommended Practice
+## Release Checklist
 
-Use `advance_workflow` as the normal entrypoint. The other tools are lower-level primitives used by the runtime and by advanced debugging.
+Before publishing:
 
-`advance_workflow` starts from a user-provided product goal, then automatically:
+1. Create the public GitHub repository and update `package.json` with `repository`, `homepage`, and `bugs` URLs.
+2. Confirm the npm package name is available:
 
-- registers the user's product goal as the active internal task
-- scans project context
-- retrieves global experience
-- asks only when it discovers a high-impact ambiguity during requirements, architecture, planning, verification, or release work
-- records generated requirements, ADR, and backlog artifacts
-- dispatches the next execution role when code, verification, review, or learning needs an external agent
-- records every advancement in the trace ledger
+```bash
+npm view ai-engineering-workflow version
+```
 
-## Agent Progress Feedback
+An npm 404 usually means the package name is not currently published.
 
-MCP responses include progress fields that Codex, Claude Code, Cursor, or another harness can surface directly to the user:
+3. Log in to npm:
 
-- `current_role`: the active virtual team role, such as `developer` or `architect`.
-- `current_phase`: the workflow phase, such as `requirements`, `architecture`, or `build_loop`.
-- `progress_message`: a concise human-facing status message.
-- `agent_feedback_prompt`: a short instruction telling the execution agent how to explain the current status before continuing.
+```bash
+npm adduser
+npm whoami
+```
 
-The high-level `advance_workflow` tool and the lower-level `get_role_action`, `dispatch_agent_task`, `ask_user_decision`, `record_user_decision`, and `run_gate` tools all return progress feedback. Trace events also record progress messages so the audit bundle can reconstruct who was active and what phase the workflow was in.
+This package sets `publishConfig.registry` to the official npm registry so publishing does not accidentally target a local mirror.
+
+4. Run verification:
+
+```bash
+npm run verify
+```
+
+5. Review what will be published:
+
+```bash
+npm pack --dry-run
+```
+
+6. Publish:
+
+```bash
+npm publish
+```
+
+For a scoped public package such as `@your-scope/ai-engineering-workflow`, use:
+
+```bash
+npm publish --access public
+```
+
+The npm docs recommend reviewing package contents for sensitive or unnecessary information before publishing, testing the package, and using `--access public` for scoped public packages. See the official npm docs for `package.json`, `npm publish`, and scoped public packages:
+
+- https://docs.npmjs.com/files/package.json/
+- https://docs.npmjs.com/cli/publish/
+- https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/
+
+## Security And Privacy
+
+This tool writes project workflow data to the target repository and global memory to `AI_ENGINEERING_HOME` or `~/.ai-engineering`.
+
+Before sharing logs, audit bundles, or global memory, check for:
+
+- product strategy
+- proprietary code paths
+- user data
+- secrets
+- credentials
+- private URLs
+- vendor or customer names
+
+Do not publish generated `.ai-engineering/` runtime directories by default unless the target project intentionally treats audit logs as public artifacts.
+
+## Roadmap
+
+- richer Codex and Claude Code execution adapters
+- adapter health checks and retry policies
+- stronger schema validation for all ledger records
+- configurable gate policies
+- global memory conflict detection
+- import/export for organization preferences
+- CI examples for package provenance and release automation
 
 ## Role Prompt References
 
@@ -190,3 +448,7 @@ Adaptation notes:
 - The PM role is forbidden from prescribing low-level implementation details unless they are already project constraints.
 - All roles must preserve traceability from product goal to requirements, stories, acceptance criteria, backlog, implementation, tests, evidence, review, release, learning, and ChangeSets.
 - Role prompts are not meant to replace the workflow gates; they tell each role how to produce evidence that the gates can verify.
+
+## License
+
+MIT
