@@ -17,6 +17,7 @@ npm run verify
 | Core workflow lifecycle | project initialization, goal creation, context scan, experience retrieval, role packets, decisions, evidence, ChangeSets, dispatch, learning, sandbox promotion, gate, audit export | `tests/workflow.test.mjs` |
 | Automatic advancement | one high-level call plans/scans/retrieves/records artifacts, avoids unnecessary questions, and stops only when a discovered ambiguity is high-impact | `tests/auto-advance.test.mjs` |
 | Role prompt contracts | every virtual team role has executable role guidance, artifact contract, frameworks, and quality bar exposed in task packets | `tests/roles.test.mjs` |
+| Agent progress feedback | workflow, role, dispatch, decision, and gate responses expose progress messages and agent feedback prompts | `tests/auto-advance.test.mjs`, `tests/workflow.test.mjs`, `tests/mcp-tools.test.mjs` |
 | MCP tool coverage | every MCP tool can be listed and executed through stdio JSON-RPC | `tests/mcp-tools.test.mjs` |
 | CLI smoke | debug CLI can run the operator workflow in an isolated repository | `tests/cli-smoke.test.mjs` |
 | Gate blocking | incomplete phases are blocked until required context, ChangeSets, and evidence exist | `tests/gates-and-trace.test.mjs` |

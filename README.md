@@ -154,6 +154,17 @@ Use `advance_workflow` as the normal entrypoint. The other tools are lower-level
 - dispatches the next execution role when code, verification, review, or learning needs an external agent
 - records every advancement in the trace ledger
 
+## Agent Progress Feedback
+
+MCP responses include progress fields that Codex, Claude Code, Cursor, or another harness can surface directly to the user:
+
+- `current_role`: the active virtual team role, such as `developer` or `architect`.
+- `current_phase`: the workflow phase, such as `requirements`, `architecture`, or `build_loop`.
+- `progress_message`: a concise human-facing status message.
+- `agent_feedback_prompt`: a short instruction telling the execution agent how to explain the current status before continuing.
+
+The high-level `advance_workflow` tool and the lower-level `get_role_action`, `dispatch_agent_task`, `ask_user_decision`, `record_user_decision`, and `run_gate` tools all return progress feedback. Trace events also record progress messages so the audit bundle can reconstruct who was active and what phase the workflow was in.
+
 ## Role Prompt References
 
 The role prompts in `src/core/defaults.mjs` are original syntheses for this project. They do not vendor or copy complete third-party skill prompts. The design was informed by these public references:

@@ -25,6 +25,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
           reason: "No active user-provided product goal exists. Provide product_goal, title, description, or call create_goal with the user's goal.",
           actions
         };
+        attachProgress(projectRoot, result, { role: "pm", phase: "intake" });
         await recordAdvanceEvent(projectRoot, result);
         return result;
       }
@@ -72,6 +73,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
           pending_decisions: pending,
           actions
         };
+        attachProgress(projectRoot, result, { role: "pm", phase: "clarification_gate" });
         await recordAdvanceEvent(projectRoot, result);
         return result;
       }
@@ -156,6 +158,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         dispatch,
         actions
       };
+      attachProgress(projectRoot, result, { role: "developer", phase: "build_loop", dispatch });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -173,6 +176,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         dispatch,
         actions
       };
+      attachProgress(projectRoot, result, { role: "qa", phase: "verification_loop", dispatch });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -190,6 +194,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         dispatch,
         actions
       };
+      attachProgress(projectRoot, result, { role: "reviewer", phase: "review_gate", dispatch });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -221,6 +226,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         dispatch,
         actions
       };
+      attachProgress(projectRoot, result, { role: "learning_coach", phase: "retro_learn", dispatch });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -234,6 +240,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
         audit,
         actions
       };
+      attachProgress(projectRoot, result, { role: "trace_auditor", phase: "archive" });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -243,6 +250,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
       reason: `Unknown phase: ${state.current_phase}`,
       actions
     };
+    attachProgress(projectRoot, result, { role: PHASE_OWNER[state.current_phase] || "delivery_manager", phase: state.current_phase });
     await recordAdvanceEvent(projectRoot, result);
     return result;
   }
@@ -252,6 +260,7 @@ export async function advanceWorkflow(projectRoot, input = {}) {
     reason: `Stopped after ${maxSteps} automatic steps.`,
     actions
   };
+  attachProgress(projectRoot, result, { role: "delivery_manager", phase: "automation" });
   await recordAdvanceEvent(projectRoot, result);
   return result;
 }
@@ -297,6 +306,19 @@ export async function getRoleAction(projectRoot, input = {}) {
     ok: true,
     role,
     phase: state.current_phase,
+    progress_message: formatProgressMessage({
+      projectRoot,
+      role,
+      phase: state.current_phase,
+      status: "role_action_created",
+      reason: `Created a ${roleDef.title} task packet.`
+    }),
+    agent_feedback_prompt: formatAgentFeedbackPrompt({
+      role,
+      phase: state.current_phase,
+      status: "role_action_created",
+      next: packet.expected_next_action
+    }),
     prompt_ref: promptRef,
     packet,
     files: {
@@ -309,11 +331,85 @@ export async function getRoleAction(projectRoot, input = {}) {
 async function recordAdvanceEvent(projectRoot, result) {
   await appendTraceEvent(projectRoot, {
     type: "workflow_advanced",
-    role: "delivery_manager",
+    role: result.current_role || "delivery_manager",
+    phase: result.current_phase || null,
     status: result.status,
     reason: result.reason,
+    progress_message: result.progress_message,
+    agent_feedback_prompt: result.agent_feedback_prompt,
     action_count: result.actions?.length || 0
   });
+}
+
+function attachProgress(projectRoot, result, input = {}) {
+  const role = input.role || "delivery_manager";
+  const phase = input.phase || "unknown";
+  const dispatch = input.dispatch;
+  const next = nextInstructionForStatus(result, { role, phase, dispatch });
+  result.current_role = role;
+  result.current_phase = phase;
+  result.progress_message = formatProgressMessage({
+    projectRoot,
+    role,
+    phase,
+    status: result.status,
+    reason: result.reason,
+    actionCount: result.actions?.length || 0,
+    next
+  });
+  result.agent_feedback_prompt = formatAgentFeedbackPrompt({
+    role,
+    phase,
+    status: result.status,
+    next
+  });
+  return result;
+}
+
+function nextInstructionForStatus(result, { role, phase, dispatch }) {
+  if (result.status === "needs_product_goal") {
+    return "Ask the user for a concrete product goal before invoking advance_workflow again.";
+  }
+  if (result.status === "user_input_required") {
+    const decision = result.pending_decisions?.[0];
+    return decision ? `Ask the user this decision question, then record_user_decision with decision_id ${decision.decision_id}.` : "Ask the user for the pending decision, then record it.";
+  }
+  if (result.status === "external_agent_required") {
+    const packet = dispatch?.role_action?.files?.markdown || "the generated task packet";
+    return `The ${role} role should execute next using the task packet at ${packet}, then record artifacts/evidence/ChangeSets and run the next gate.`;
+  }
+  if (result.status === "complete") {
+    return "Report the audit bundle and summarize the traceability outcome.";
+  }
+  if (result.status === "step_limit_reached") {
+    return "Call advance_workflow again to continue from the recorded state.";
+  }
+  return `Continue workflow from phase ${phase}.`;
+}
+
+function formatProgressMessage({ projectRoot, role, phase, status, reason, actionCount = null, next = "" }) {
+  const roleTitle = ROLES[role]?.title || role;
+  const parts = [
+    `[AI Engineering Workflow] ${roleTitle} is active.`,
+    `Phase: ${phase}.`,
+    `Status: ${status}.`
+  ];
+  if (reason) parts.push(`Reason: ${reason}`);
+  if (actionCount !== null) parts.push(`Recorded actions: ${actionCount}.`);
+  if (projectRoot) parts.push(`Project: ${projectRoot}.`);
+  if (next) parts.push(`Next: ${next}`);
+  return parts.join(" ");
+}
+
+function formatAgentFeedbackPrompt({ role, phase, status, next }) {
+  const roleTitle = ROLES[role]?.title || role;
+  return [
+    `You are currently acting as: ${roleTitle}.`,
+    `Workflow phase: ${phase}.`,
+    `Workflow status: ${status}.`,
+    `Tell the user this status briefly before continuing.`,
+    next ? `Next action: ${next}` : "Next action: continue according to the workflow state."
+  ].join("\n");
 }
 
 function summarize(value) {
@@ -358,6 +454,20 @@ export async function askUserDecision(projectRoot, input = {}) {
   });
   return {
     ok: true,
+    progress_message: formatProgressMessage({
+      projectRoot,
+      role: "pm",
+      phase: "clarification_gate",
+      status: "decision_requested",
+      reason: `Created decision question ${question.decision_id}.`,
+      next: `Ask the user the question, then call record_user_decision with decision_id ${question.decision_id}.`
+    }),
+    agent_feedback_prompt: formatAgentFeedbackPrompt({
+      role: "pm",
+      phase: "clarification_gate",
+      status: "decision_requested",
+      next: `Pause and ask the user: ${question.question}`
+    }),
     decision: question
   };
 }
@@ -392,6 +502,20 @@ export async function recordUserDecision(projectRoot, input = {}) {
   });
   return {
     ok: true,
+    progress_message: formatProgressMessage({
+      projectRoot,
+      role: "pm",
+      phase: "clarification_gate",
+      status: "decision_answered",
+      reason: `Recorded user decision ${decisionId}.`,
+      next: "Call advance_workflow again to continue from the recorded decision."
+    }),
+    agent_feedback_prompt: formatAgentFeedbackPrompt({
+      role: "pm",
+      phase: "clarification_gate",
+      status: "decision_answered",
+      next: "Tell the user the decision was recorded, then continue the workflow from the current state."
+    }),
     decision
   };
 }
@@ -428,6 +552,20 @@ export async function dispatchAgentTask(projectRoot, input = {}) {
   });
   return {
     ok: true,
+    progress_message: formatProgressMessage({
+      projectRoot,
+      role,
+      phase: roleAction.phase,
+      status: "agent_task_dispatched",
+      reason: `Dispatched ${role} work to ${adapter}.`,
+      next: `The ${role} role should execute the task packet at ${roleAction.files.markdown}, then record artifacts/evidence/ChangeSets and run the next gate.`
+    }),
+    agent_feedback_prompt: formatAgentFeedbackPrompt({
+      role,
+      phase: roleAction.phase,
+      status: "agent_task_dispatched",
+      next: `Use ${roleAction.files.markdown} as the task packet. Report this status to the user, execute only this role, then record evidence and trace data.`
+    }),
     dispatch,
     role_action: roleAction
   };
@@ -459,6 +597,21 @@ export async function runGate(projectRoot, input = {}) {
     }
   }
 
+  const progress_message = formatProgressMessage({
+    projectRoot,
+    role: PHASE_OWNER[phase] || "delivery_manager",
+    phase,
+    status: passed ? "gate_passed" : "gate_blocked",
+    reason: passed ? `Gate ${phase} passed.` : `Gate ${phase} is blocked by ${findings.filter((finding) => finding.severity === "blocker").length} blocker(s).`,
+    next: passed ? `Continue to phase ${next_phase}.` : "Resolve blocker findings, record missing artifacts/evidence/decisions, then run the gate again."
+  });
+  const agent_feedback_prompt = formatAgentFeedbackPrompt({
+    role: PHASE_OWNER[phase] || "delivery_manager",
+    phase,
+    status: passed ? "gate_passed" : "gate_blocked",
+    next: passed ? `Tell the user ${phase} passed and continue to ${next_phase}.` : "Tell the user which gate is blocked and summarize the blocker findings."
+  });
+
   await appendTraceEvent(projectRoot, {
     type: "gate_run",
     task_id: state.active_task_id,
@@ -466,11 +619,15 @@ export async function runGate(projectRoot, input = {}) {
     phase,
     passed,
     next_phase,
+    progress_message,
+    agent_feedback_prompt,
     findings
   });
 
   return {
     ok: true,
+    progress_message,
+    agent_feedback_prompt,
     phase,
     passed,
     next_phase,
@@ -504,6 +661,7 @@ async function maybeAskDiscoveredClarification(projectRoot, { phase, goal, conte
     pending_decisions: [decision.decision],
     actions
   };
+  attachProgress(projectRoot, result, { role: PHASE_OWNER[phase] || "pm", phase });
   await recordAdvanceEvent(projectRoot, result);
   return result;
 }

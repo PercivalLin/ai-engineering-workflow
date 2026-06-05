@@ -75,6 +75,7 @@ test("MCP server exposes and executes every planned tool", async () => {
       skip_questions: true
     });
     assert.equal(auto.status, "external_agent_required");
+    assert.match(auto.progress_message, /Developer is active/);
 
     const goal = await mcp.tool("create_goal", {
       project_root: fixture.projectRoot,
@@ -100,12 +101,14 @@ test("MCP server exposes and executes every planned tool", async () => {
       objective: "Design the trace runtime"
     });
     assert.equal(role.role, "architect");
+    assert.match(role.progress_message, /Architect \/ Tech Lead is active/);
 
     const decision = await mcp.tool("ask_user_decision", {
       project_root: fixture.projectRoot,
       topic: "target_users"
     });
     assert.equal(decision.decision.status, "pending");
+    assert.match(decision.progress_message, /Product Manager is active/);
 
     const answer = await mcp.tool("record_user_decision", {
       project_root: fixture.projectRoot,
@@ -114,6 +117,7 @@ test("MCP server exposes and executes every planned tool", async () => {
       answered_by: "test"
     });
     assert.equal(answer.decision.status, "answered");
+    assert.match(answer.agent_feedback_prompt, /decision was recorded/);
 
     const artifact = await mcp.tool("record_artifact", {
       project_root: fixture.projectRoot,
@@ -172,6 +176,7 @@ test("MCP server exposes and executes every planned tool", async () => {
       phase: "build_loop"
     });
     assert.equal(gate.passed, true);
+    assert.match(gate.progress_message, /build_loop/);
 
     const learning = await mcp.tool("propose_learning", {
       project_root: fixture.projectRoot,

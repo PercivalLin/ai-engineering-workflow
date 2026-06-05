@@ -14,6 +14,8 @@ test("advance_workflow refuses to invent a product goal", async () => {
 
     assert.equal(result.status, "needs_product_goal");
     assert.match(result.reason, /user-provided product goal/);
+    assert.match(result.progress_message, /Product Manager is active/);
+    assert.match(result.agent_feedback_prompt, /Workflow phase: intake/);
 
     const state = await readProjectState(fixture.projectRoot);
     assert.equal(state.active_task_id, null);
@@ -32,6 +34,8 @@ test("advance_workflow does not ask unnecessary questions for a concrete product
     });
 
     assert.equal(result.status, "external_agent_required");
+    assert.match(result.progress_message, /Developer is active/);
+    assert.match(result.agent_feedback_prompt, /Workflow phase: build_loop/);
     assert.ok(result.actions.some((action) => action.action === "create_goal"));
     assert.ok(result.actions.some((action) => action.action === "scan_project_context"));
     assert.ok(result.actions.some((action) => action.action === "retrieve_global_experience"));
@@ -54,6 +58,8 @@ test("advance_workflow stops to ask when a high-impact ambiguity is discovered d
     });
 
     assert.equal(result.status, "user_input_required");
+    assert.match(result.progress_message, /Architect \/ Tech Lead is active/);
+    assert.match(result.agent_feedback_prompt, /Workflow phase: architecture/);
     assert.equal(result.pending_decisions.length, 1);
     assert.equal(result.pending_decisions[0].topic, "auth_security_model");
     assert.match(result.reason, /architecture/);
@@ -78,6 +84,8 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
     });
 
     assert.equal(result.status, "external_agent_required");
+    assert.match(result.progress_message, /Developer is active/);
+    assert.match(result.agent_feedback_prompt, /task packet/);
     assert.equal(result.dispatch.dispatch.role, "developer");
     assert.equal(result.dispatch.dispatch.adapter, "codex");
     assert.ok(result.actions.some((action) => action.action === "record_artifact" && action.artifact_type === "requirements"));

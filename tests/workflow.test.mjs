@@ -51,6 +51,8 @@ test("runs the core workflow and exports an audit bundle", async () => {
   assert.equal(roleAction.ok, true);
   assert.equal(roleAction.role, "developer");
   assert.ok(roleAction.prompt_ref);
+  assert.match(roleAction.progress_message, /Developer is active/);
+  assert.match(roleAction.agent_feedback_prompt, /Workflow phase:/);
 
   const pmRoleAction = await getRoleAction(projectRoot, {
     role: "pm",
@@ -122,6 +124,8 @@ test("runs the core workflow and exports an audit bundle", async () => {
   });
   assert.equal(dispatch.ok, true);
   assert.equal(dispatch.dispatch.adapter, "codex");
+  assert.match(dispatch.progress_message, /Code Reviewer is active/);
+  assert.match(dispatch.agent_feedback_prompt, /task packet/);
 
   const learning = await proposeLearning(projectRoot, {
     type: "case",
@@ -142,6 +146,8 @@ test("runs the core workflow and exports an audit bundle", async () => {
   const gate = await runGate(projectRoot, { phase: "build_loop" });
   assert.equal(gate.ok, true);
   assert.equal(gate.passed, true);
+  assert.match(gate.progress_message, /Developer is active/);
+  assert.match(gate.agent_feedback_prompt, /Workflow phase: build_loop/);
 
   const audit = await exportAuditBundle(projectRoot);
   assert.equal(audit.ok, true);
