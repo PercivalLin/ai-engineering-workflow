@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Agent-neutral AI engineering team runtime with global memory, workflow gates, and traceable change history.",
   "type": "module",
+  "homepage": "https://github.com/PercivalLin/ai-engineering-workflow#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PercivalLin/ai-engineering-workflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PercivalLin/ai-engineering-workflow/issues"
+  },
   "keywords": [
     "ai",
     "agents",

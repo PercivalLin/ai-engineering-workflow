@@ -92,7 +92,7 @@ npx -y ai-engineering-workflow server
 ### From source
 
 ```bash
-git clone <your-repository-url> ai-engineering-workflow
+git clone https://github.com/PercivalLin/ai-engineering-workflow.git
 cd ai-engineering-workflow
 npm run verify
 node ./bin/ai-engineering.mjs server
