@@ -6,9 +6,9 @@
 
 <p align="center">
   <a href="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://www.npmjs.com/package/ai-engineering-workflow"><img alt="npm" src="https://img.shields.io/npm/v/ai-engineering-workflow.svg"></a>
+  <img alt="npm publish ready" src="https://img.shields.io/badge/npm-publish--ready-CB3837.svg">
   <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img alt="Node.js >=20" src="https://img.shields.io/badge/node-%3E%3D20-339933.svg">
+  <img alt="Node.js 20+" src="https://img.shields.io/badge/node-20%2B-339933.svg">
   <img alt="MCP" src="https://img.shields.io/badge/MCP-server-6f42c1.svg">
 </p>
 
