@@ -107,3 +107,28 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
     fixture.restoreEnv();
   }
 });
+
+test("advance_workflow routes read-only analysis goals to reviewer instead of developer", async () => {
+  const fixture = await makeFixtureProject("aiwf-auto-analysis-route-");
+  try {
+    const result = await advanceWorkflow(fixture.projectRoot, {
+      product_goal: "Analyze the current repository, identify prioritized adoption improvements, and do not modify source code during this analysis.",
+      risk_level: "low",
+      skip_questions: true,
+      adapter: "codex"
+    });
+
+    assert.equal(result.status, "external_agent_required");
+    assert.equal(result.dispatch.dispatch.role, "reviewer");
+    assert.match(result.progress_message, /Code Reviewer is active/);
+    assert.equal(result.dispatch.role_action.packet.workflow_classification.kind, "analysis");
+    assert.equal(result.dispatch.role_action.packet.workflow_classification.requires_changes, false);
+
+    const state = await readProjectState(fixture.projectRoot);
+    assert.equal(state.current_phase, "build_loop");
+    assert.equal(state.backlog[0].role, "reviewer");
+    assert.match(state.backlog[0].title, /analyzes/i);
+  } finally {
+    fixture.restoreEnv();
+  }
+});

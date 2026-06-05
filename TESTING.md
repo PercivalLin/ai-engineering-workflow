@@ -16,7 +16,7 @@ For release-style local verification:
 npm run ci
 ```
 
-`ci` runs `verify` and then `npm pack --dry-run` so package contents are checked before publishing.
+`ci` runs `verify`, `npm audit --omit=dev`, and `npm pack --dry-run` so package contents and dependency metadata are checked before publishing.
 
 ## Experiments
 

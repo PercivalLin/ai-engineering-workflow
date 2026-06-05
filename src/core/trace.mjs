@@ -39,6 +39,7 @@ export async function recordChangeset(projectRoot, input = {}) {
   const paths = projectPaths(projectRoot);
   await ensureDir(paths.changesets);
   const state = await readProjectState(projectRoot);
+  const inferredRefs = await inferLatestTaskPacketRefs(paths, state, input);
   const diff = input.diff || await currentDiff(projectRoot);
   const diffHash = input.diff_hash || hashText(diff);
   const changeId = input.change_id || newId("change");
@@ -50,8 +51,8 @@ export async function recordChangeset(projectRoot, input = {}) {
     decision_id: input.decision_id || null,
     role: input.role || "developer",
     agent: input.agent || "unknown",
-    prompt_ref: input.prompt_ref || null,
-    context_ref: input.context_ref || null,
+    prompt_ref: input.prompt_ref || input.promptRef || inferredRefs.prompt_ref || null,
+    context_ref: input.context_ref || input.contextRef || inferredRefs.context_ref || null,
     files_changed: filesChanged,
     diff_hash: diffHash,
     commands_run: input.commands_run || input.commandsRun || [],
@@ -74,6 +75,8 @@ export async function recordChangeset(projectRoot, input = {}) {
     role: change.role,
     agent: change.agent,
     change_id: changeId,
+    prompt_ref: change.prompt_ref,
+    context_ref: change.context_ref,
     diff_hash: diffHash,
     files_changed: filesChanged,
     evidence_refs: change.evidence_refs,
@@ -88,6 +91,35 @@ export async function recordChangeset(projectRoot, input = {}) {
       patch: patchFile
     }
   };
+}
+
+async function inferLatestTaskPacketRefs(paths, state, input) {
+  const hasPromptRef = Boolean(input.prompt_ref || input.promptRef);
+  const hasContextRef = Boolean(input.context_ref || input.contextRef);
+  if (hasPromptRef && hasContextRef) return {};
+
+  const taskId = input.task_id || state.active_task_id;
+  if (!taskId) return {};
+
+  const trace = await readJsonl(paths.traceLedger);
+  const role = input.role || null;
+  const exact = latestRoleAction(trace, taskId, role);
+  const fallback = exact || latestRoleAction(trace, taskId, null);
+  return {
+    prompt_ref: hasPromptRef ? null : fallback?.prompt_ref || null,
+    context_ref: hasContextRef ? null : fallback?.context_ref || null
+  };
+}
+
+function latestRoleAction(trace, taskId, role) {
+  for (let index = trace.length - 1; index >= 0; index -= 1) {
+    const event = trace[index];
+    if (event.type !== "role_action_created") continue;
+    if (event.task_id !== taskId) continue;
+    if (role && event.role !== role) continue;
+    return event;
+  }
+  return null;
 }
 
 export async function recordEvidence(projectRoot, input = {}) {

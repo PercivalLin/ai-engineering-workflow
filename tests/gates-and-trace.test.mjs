@@ -43,15 +43,15 @@ test("gates block missing evidence and audit flags weak ChangeSets", async () =>
       outcome: "passed",
       summary: "Complete ChangeSet evidence."
     });
-    await recordChangeset(fixture.projectRoot, {
+    const completeChange = await recordChangeset(fixture.projectRoot, {
       role: "developer",
       agent: "codex",
-      prompt_ref: roleAction.prompt_ref,
-      context_ref: roleAction.packet.project_context_ref,
       files_changed: ["index.js"],
       evidence_refs: [evidence.evidence.evidence_id],
       rollback_plan: "Revert index.js."
     });
+    assert.equal(completeChange.changeset.prompt_ref, roleAction.prompt_ref);
+    assert.equal(completeChange.changeset.context_ref, roleAction.packet.project_context_ref);
     const finalAudit = await exportAuditBundle(fixture.projectRoot);
     const completeFindings = finalAudit.traceability.missing_trace_findings.filter((finding) => !finding.change_id.includes("change_"));
     assert.deepEqual(completeFindings, []);
@@ -69,6 +69,31 @@ test("learning proposals require evidence refs", async () => {
     });
     assert.equal(blocked.ok, false);
     assert.equal(blocked.blocked, true);
+  } finally {
+    fixture.restoreEnv();
+  }
+});
+
+test("build gate accepts read-only analysis evidence without a ChangeSet", async () => {
+  const fixture = await makeFixtureProject("aiwf-readonly-analysis-gate-");
+  try {
+    await initProject(fixture.projectRoot);
+    await createGoal(fixture.projectRoot, {
+      title: "Read-only repository analysis",
+      description: "Analyze repository adoption risks and do not modify source code."
+    });
+
+    const blocked = await runGate(fixture.projectRoot, { phase: "build_loop" });
+    assert.equal(blocked.passed, false);
+    assert.match(blocked.findings[0].message, /analysis evidence/);
+
+    await recordEvidence(fixture.projectRoot, {
+      evidence_type: "review",
+      outcome: "passed",
+      summary: "Read-only analysis findings were recorded."
+    });
+    const passed = await runGate(fixture.projectRoot, { phase: "build_loop" });
+    assert.equal(passed.passed, true);
   } finally {
     fixture.restoreEnv();
   }

@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning once published.
 
-## 0.1.0 - Unreleased
+## 0.1.1 - Unreleased
+
+### Fixed
+
+- Route read-only analysis workflow goals to Reviewer instead of always dispatching Developer.
+- Allow read-only analysis tasks to pass the build gate with recorded evidence instead of requiring a ChangeSet.
+- Infer missing ChangeSet `prompt_ref` and `context_ref` from the latest task packet for the active task.
+- Shorten the English README into a focused project landing page.
+
+### Changed
+
+- Add `npm audit --omit=dev` to local CI verification.
+
+## 0.1.0 - 2026-06-05
 
 ### Added
 

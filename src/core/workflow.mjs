@@ -146,19 +146,20 @@ export async function advanceWorkflow(projectRoot, input = {}) {
     }
 
     if (state.current_phase === "build_loop") {
+      const work = classifyGoal(goal);
       const dispatch = await dispatchAgentTask(projectRoot, {
         adapter,
-        role: "developer",
-        objective: `Implement the next planned slice for: ${goal.title}`
+        role: work.primary_role,
+        objective: work.objective
       });
-      actions.push({ action: "dispatch_agent_task", role: "developer", result: summarize(dispatch) });
+      actions.push({ action: "dispatch_agent_task", role: work.primary_role, result: summarize(dispatch) });
       const result = {
         status: "external_agent_required",
-        reason: "Developer implementation requires an execution agent. The workflow created and recorded the task packet.",
+        reason: `${ROLES[work.primary_role]?.title || work.primary_role} execution requires an external agent. The workflow created and recorded the task packet.`,
         dispatch,
         actions
       };
-      attachProgress(projectRoot, result, { role: "developer", phase: "build_loop", dispatch });
+      attachProgress(projectRoot, result, { role: work.primary_role, phase: "build_loop", dispatch });
       await recordAdvanceEvent(projectRoot, result);
       return result;
     }
@@ -538,7 +539,7 @@ export async function dispatchAgentTask(projectRoot, input = {}) {
     prompt_ref: roleAction.prompt_ref,
     mode: "external_agent",
     owns_workflow_decisions: false,
-    instructions: adapterInstructions(adapter, roleAction.files.markdown),
+    instructions: adapterInstructions(adapter, roleAction.files.markdown, roleAction.packet),
     created_at: nowIso()
   };
   await appendTraceEvent(projectRoot, {
@@ -647,6 +648,55 @@ function normalizeProductGoal(input) {
 
 function firstLine(text) {
   return String(text || "").split(/\r?\n/).find((line) => line.trim())?.trim() || "User product goal";
+}
+
+function classifyGoal(goal) {
+  const text = `${goal?.title || ""}\n${goal?.description || ""}`.toLowerCase();
+  const asksForChange = /(fix|implement|build|create|add|update|modify|change|refactor|解决|修复|实现|创建|添加|更新|修改|重构)/i.test(text);
+  const noChange = /(do not modify|don't modify|without modifying|no code changes|no source code changes|read[- ]?only|analysis only|不要修改|不修改|只分析|仅分析)/i.test(text);
+  const security = /(security|privacy|threat|secret|supply[- ]?chain|permission|安全|隐私|威胁|密钥|权限)/i.test(text);
+  const documentation = /(readme|docs|documentation|changelog|security\.md|文档|说明|中文|英文|自述)/i.test(text);
+  const release = /(release|publish|npm|github release|tag|发布|上线|npm 包)/i.test(text);
+  const analysis = /(analy[sz]e|analysis|review|assess|identify|audit|inspect|评估|分析|审查|检查|识别|审计)/i.test(text);
+
+  if ((security && analysis) || (security && noChange)) {
+    return {
+      kind: "security_review",
+      primary_role: "security",
+      requires_changes: asksForChange && !noChange,
+      objective: `Review security, privacy, supply-chain, and release risk for: ${goal.title}`
+    };
+  }
+  if (noChange || (analysis && !asksForChange)) {
+    return {
+      kind: "analysis",
+      primary_role: "reviewer",
+      requires_changes: false,
+      objective: `Analyze the repository and produce prioritized findings for: ${goal.title}`
+    };
+  }
+  if (documentation) {
+    return {
+      kind: "documentation",
+      primary_role: "writer",
+      requires_changes: true,
+      objective: `Update public documentation for: ${goal.title}`
+    };
+  }
+  if (release) {
+    return {
+      kind: "release",
+      primary_role: "sre",
+      requires_changes: asksForChange,
+      objective: `Prepare release readiness and operational evidence for: ${goal.title}`
+    };
+  }
+  return {
+    kind: "implementation",
+    primary_role: "developer",
+    requires_changes: true,
+    objective: `Implement the next planned slice for: ${goal.title}`
+  };
 }
 
 async function maybeAskDiscoveredClarification(projectRoot, { phase, goal, context, actions, input }) {
@@ -764,6 +814,7 @@ function inferScopes(context) {
 
 function buildRolePacket({ state, role, roleDef, context, memory, objective }) {
   const goal = activeGoal(state);
+  const work = classifyGoal(goal);
   return {
     packet_id: newId("packet"),
     task_id: state.active_task_id,
@@ -778,6 +829,7 @@ function buildRolePacket({ state, role, roleDef, context, memory, objective }) {
     quality_bar: roleDef.quality_bar || [],
     objective: objective || goal?.title || state.current_phase,
     goal,
+    workflow_classification: work,
     required_inputs: roleDef.inputs,
     required_outputs: roleDef.outputs,
     gates: roleDef.gates,
@@ -797,15 +849,19 @@ function buildRolePacket({ state, role, roleDef, context, memory, objective }) {
       "Every code modification must produce a ChangeSet with diff hash, commands, tests, evidence, review references, and rollback plan.",
       "Do not bypass tests, security checks, review gates, or trace requirements."
     ],
-    expected_next_action: expectedNextAction(role, state.current_phase),
+    expected_next_action: expectedNextAction(role, state.current_phase, work),
     created_at: nowIso()
   };
 }
 
-function expectedNextAction(role, phase) {
+function expectedNextAction(role, phase, work = null) {
   if (phase === "context_scan") return "Run or request scan_project_context, then retrieve global experience.";
   if (phase === "clarification_gate") return "Generate only high-impact user questions that cannot be answered from context.";
+  if (phase === "build_loop" && work && !work.requires_changes) return "Produce the requested analysis, record review/manual evidence, and record a ChangeSet only if files are modified.";
   if (role === "developer") return "Implement the smallest useful slice, run relevant checks, then record a ChangeSet.";
+  if (role === "writer") return "Update documentation, run relevant checks, then record evidence and a ChangeSet if files changed.";
+  if (role === "security") return "Produce security findings, record evidence, and request changes only for verified risks.";
+  if (role === "sre") return "Produce release readiness evidence, rollback notes, and operational findings.";
   if (role === "reviewer") return "Review ChangeSets against requirements, ADR, evidence, and rollback plan.";
   if (role === "trace_auditor") return "Export an audit bundle and report missing traceability.";
   return "Produce the role outputs and record artifacts or evidence before running the next gate.";
@@ -1002,17 +1058,31 @@ function renderAutoAdr(goal, context) {
 }
 
 function buildAutoBacklog(goal) {
+  const work = classifyGoal(goal);
+  const primaryTitle = work.requires_changes
+    ? `${ROLES[work.primary_role]?.title || work.primary_role} executes smallest traceable slice for ${goal.title}`
+    : `${ROLES[work.primary_role]?.title || work.primary_role} analyzes ${goal.title}`;
+  const primaryDone = work.requires_changes
+    ? [
+      "Work is scoped to the active goal",
+      "Relevant tests or checks have evidence records",
+      "ChangeSet includes prompt_ref, context_ref, files_changed, evidence_refs, and rollback_plan"
+    ]
+    : [
+      "Analysis is scoped to the active goal",
+      "Findings are prioritized and evidence-backed",
+      "Review or manual evidence is recorded",
+      "ChangeSet is recorded only if files are modified"
+    ];
   return [
     {
-      title: `Implement smallest traceable slice for ${goal.title}`,
-      description: "Developer executes the next reversible implementation step and records a ChangeSet.",
-      role: "developer",
+      title: primaryTitle,
+      description: work.requires_changes
+        ? `${ROLES[work.primary_role]?.title || work.primary_role} executes the next reversible work step and records evidence${work.primary_role === "developer" ? " and a ChangeSet" : ", plus a ChangeSet if files changed"}.`
+        : `${ROLES[work.primary_role]?.title || work.primary_role} produces evidence-backed findings without modifying files unless explicitly required.`,
+      role: work.primary_role,
       priority: 1,
-      definition_of_done: [
-        "Implementation is scoped to the active goal",
-        "Relevant tests or checks have evidence records",
-        "ChangeSet includes prompt_ref, context_ref, files_changed, evidence_refs, and rollback_plan"
-      ],
+      definition_of_done: primaryDone,
       risk_level: goal.risk_level || "medium"
     },
     {
@@ -1066,10 +1136,13 @@ function renderAutoRelease(goal) {
   ].join("\n");
 }
 
-function adapterInstructions(adapter, packetPath) {
-  const base = `Use the task packet at ${packetPath}. Follow the role, produce required artifacts, then record evidence and a ChangeSet.`;
+function adapterInstructions(adapter, packetPath, packet = {}) {
+  const traceInstruction = packet.workflow_classification?.requires_changes === false
+    ? "Record evidence after the work; record a ChangeSet only if files are modified."
+    : "Record evidence and a ChangeSet after the work.";
+  const base = `Use the task packet at ${packetPath}. Follow the role, produce required artifacts, then ${traceInstruction}`;
   if (adapter === "codex") {
-    return `${base} In Codex, open the repository, read the packet, execute the work, and call record_changeset after edits.`;
+    return `${base} In Codex, open the repository, read the packet, execute only the delegated role, and call record_changeset after edits.`;
   }
   if (adapter === "claude_code") {
     return `${base} In Claude Code, load the packet into the session, execute only the delegated role, and return evidence refs.`;
@@ -1113,6 +1186,10 @@ async function listArtifactNames(paths) {
 
 function gateFindings({ phase, state, trace, decisions, evidence, changesets, artifacts }) {
   const findings = [];
+  const goal = activeGoal(state);
+  const work = classifyGoal(goal);
+  const taskEvidence = evidence.filter((item) => !state.active_task_id || item.task_id === state.active_task_id);
+  const taskChangesets = changesets.filter((item) => !state.active_task_id || item.task_id === state.active_task_id);
   const unresolved = (state.pending_decisions || []).filter((decision) => decision.status !== "answered");
   if (phase === "intake" && !state.active_task_id) {
     findings.push(blocker("No active task exists. Run create_goal first."));
@@ -1135,8 +1212,11 @@ function gateFindings({ phase, state, trace, decisions, evidence, changesets, ar
   if (phase === "planning" && (!state.backlog || state.backlog.length === 0)) {
     findings.push(blocker("Backlog is empty. Delivery Manager must split work into traceable tasks."));
   }
-  if (phase === "build_loop" && changesets.length === 0) {
+  if (phase === "build_loop" && work.requires_changes && taskChangesets.length === 0) {
     findings.push(blocker("No ChangeSet has been recorded."));
+  }
+  if (phase === "build_loop" && !work.requires_changes && taskEvidence.length === 0) {
+    findings.push(blocker("No analysis evidence has been recorded for this read-only workflow task."));
   }
   if (phase === "verification_loop" && !evidence.some((item) => ["test", "scan", "security", "qa"].includes(item.evidence_type))) {
     findings.push(blocker("Verification evidence is missing."));

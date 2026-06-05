@@ -8,13 +8,20 @@ The project is pre-1.0. Security fixes should target the latest published versio
 
 ## Reporting A Vulnerability
 
-Until a public repository security advisory channel is configured, please report vulnerabilities privately to the project maintainer.
+Please report vulnerabilities through GitHub Security Advisories:
 
-When the GitHub repository is created, update this file with:
+https://github.com/PercivalLin/ai-engineering-workflow/security/advisories/new
 
-- the maintainer security contact
-- the GitHub Security Advisories link
-- expected response times
+If GitHub Security Advisories are unavailable for your account, contact the maintainer through the GitHub profile linked from the repository owner.
+
+Please include:
+
+- affected version or commit
+- reproduction steps
+- expected impact
+- whether the issue affects local project logs, global memory, MCP tool calls, package installation, or published artifacts
+
+Expected initial response time is best-effort during the pre-1.0 phase.
 
 ## Sensitive Data Handling
 
