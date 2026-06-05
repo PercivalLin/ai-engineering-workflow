@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vibe-engineering.local/schemas/evidence.schema.json",
-  "title": "AI Engineering Evidence",
+  "$id": "https://agentwolf.local/schemas/evidence.schema.json",
+  "title": "AgentWolf Evidence",
   "type": "object",
   "required": ["evidence_id", "evidence_type", "outcome", "timestamp", "hash"],
   "properties": {

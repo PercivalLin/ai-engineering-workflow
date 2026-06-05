@@ -1,15 +1,15 @@
 {
-  "name": "vibe-engineering",
+  "name": "agentwolf",
   "version": "0.1.1",
   "description": "Agent-neutral virtual engineering team runtime with workflow gates, global memory, and traceable ChangeSets.",
   "type": "module",
-  "homepage": "https://github.com/PercivalLin/vibe-engineering#readme",
+  "homepage": "https://github.com/PercivalLin/agentwolf#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PercivalLin/vibe-engineering.git"
+    "url": "git+https://github.com/PercivalLin/agentwolf.git"
   },
   "bugs": {
-    "url": "https://github.com/PercivalLin/vibe-engineering/issues"
+    "url": "https://github.com/PercivalLin/agentwolf/issues"
   },
   "keywords": [
     "ai",
@@ -24,18 +24,18 @@
     "automation"
   ],
   "bin": {
-    "vibe-engineering": "bin/vibe-engineering.mjs"
+    "agentwolf": "bin/agentwolf.mjs"
   },
   "scripts": {
-    "start": "node ./bin/vibe-engineering.mjs server",
-    "check": "node --check bin/vibe-engineering.mjs && find src tests -name '*.mjs' -print -exec node --check {} \\;",
+    "start": "node ./bin/agentwolf.mjs server",
+    "check": "node --check bin/agentwolf.mjs && find src tests -name '*.mjs' -print -exec node --check {} \\;",
     "test": "node --test",
     "verify": "npm run check && npm test",
     "audit": "npm audit --omit=dev",
     "pack:dry": "npm pack --dry-run",
     "ci": "npm run verify && npm run audit && npm run pack:dry",
     "prepublishOnly": "npm run verify",
-    "smoke": "node ./bin/vibe-engineering.mjs init && node ./bin/vibe-engineering.mjs create-goal --title \"Smoke goal\" --description \"Verify runtime wiring\" && node ./bin/vibe-engineering.mjs scan && node ./bin/vibe-engineering.mjs role --role pm && node ./bin/vibe-engineering.mjs export"
+    "smoke": "node ./bin/agentwolf.mjs init && node ./bin/agentwolf.mjs create-goal --title \"Smoke goal\" --description \"Verify runtime wiring\" && node ./bin/agentwolf.mjs scan && node ./bin/agentwolf.mjs role --role pm && node ./bin/agentwolf.mjs export"
   },
   "engines": {
     "node": ">=20"

@@ -42,11 +42,11 @@ function createMcpHarness() {
 }
 
 test("MCP server exposes and executes every planned tool", async () => {
-  const fixture = await makeFixtureProject("aiwf-mcp-");
+  const fixture = await makeFixtureProject("agentwolf-mcp-");
   try {
     const mcp = createMcpHarness();
     const init = await mcp.call("initialize", { protocolVersion: "2024-11-05" });
-    assert.equal(init.serverInfo.name, "vibe-engineering");
+    assert.equal(init.serverInfo.name, "agentwolf");
 
     const list = await mcp.call("tools/list");
     const toolNames = list.tools.map((item) => item.name).sort();

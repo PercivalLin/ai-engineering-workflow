@@ -83,7 +83,7 @@ export async function listFiles(root, options = {}) {
   const {
     maxFiles = 1000,
     maxDepth = 8,
-    ignore = [".git", "node_modules", ".vibe-engineering", ".ai-engineering", "dist", "build", ".next", "coverage"]
+    ignore = [".git", "node_modules", ".agentwolf", ".ai-engineering", "dist", "build", ".next", "coverage"]
   } = options;
   const results = [];
 

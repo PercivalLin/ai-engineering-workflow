@@ -263,7 +263,7 @@ async function handleRequest(request) {
       protocolVersion: request.params?.protocolVersion || "2024-11-05",
       capabilities: { tools: {} },
       serverInfo: {
-        name: "vibe-engineering",
+        name: "agentwolf",
         version: "0.1.1"
       }
     };

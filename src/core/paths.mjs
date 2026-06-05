@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { existsSync } from "node:fs";
 
 export function globalRoot() {
-  return process.env.VIBE_ENGINEERING_HOME || process.env.AI_ENGINEERING_HOME || join(homedir(), ".vibe-engineering");
+  return process.env.AGENTWOLF_HOME || process.env.AI_ENGINEERING_HOME || join(homedir(), ".agentwolf");
 }
 
 export function projectPaths(projectRoot) {
@@ -29,7 +29,7 @@ export function projectPaths(projectRoot) {
 }
 
 function projectRuntimeDir(projectRoot) {
-  const current = join(projectRoot, ".vibe-engineering");
+  const current = join(projectRoot, ".agentwolf");
   const legacy = join(projectRoot, ".ai-engineering");
   if (!existsSync(current) && existsSync(legacy)) return legacy;
   return current;

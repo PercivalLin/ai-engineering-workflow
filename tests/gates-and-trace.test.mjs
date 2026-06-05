@@ -8,7 +8,7 @@ import { proposeLearning } from "../src/core/memory.mjs";
 import { makeFixtureProject } from "./helpers.mjs";
 
 test("gates block missing evidence and audit flags weak ChangeSets", async () => {
-  const fixture = await makeFixtureProject("aiwf-gates-");
+  const fixture = await makeFixtureProject("agentwolf-gates-");
   try {
     await initProject(fixture.projectRoot);
     await createGoal(fixture.projectRoot, {
@@ -61,7 +61,7 @@ test("gates block missing evidence and audit flags weak ChangeSets", async () =>
 });
 
 test("learning proposals require evidence refs", async () => {
-  const fixture = await makeFixtureProject("aiwf-learning-");
+  const fixture = await makeFixtureProject("agentwolf-learning-");
   try {
     await initProject(fixture.projectRoot);
     const blocked = await proposeLearning(fixture.projectRoot, {
@@ -75,7 +75,7 @@ test("learning proposals require evidence refs", async () => {
 });
 
 test("build gate accepts read-only analysis evidence without a ChangeSet", async () => {
-  const fixture = await makeFixtureProject("aiwf-readonly-analysis-gate-");
+  const fixture = await makeFixtureProject("agentwolf-readonly-analysis-gate-");
   try {
     await initProject(fixture.projectRoot);
     await createGoal(fixture.projectRoot, {

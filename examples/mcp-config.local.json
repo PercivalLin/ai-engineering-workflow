@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "vibe-engineering": {
+    "agentwolf": {
       "command": "node",
-      "args": ["/absolute/path/to/vibe-engineering/bin/vibe-engineering.mjs", "server"],
+      "args": ["/absolute/path/to/agentwolf/bin/agentwolf.mjs", "server"],
       "env": {
-        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
+        "AGENTWOLF_HOME": "/Users/you/.agentwolf"
       }
     }
   }

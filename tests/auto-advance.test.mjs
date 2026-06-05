@@ -8,7 +8,7 @@ import { readJsonl } from "../src/core/fs-utils.mjs";
 import { makeFixtureProject } from "./helpers.mjs";
 
 test("advance_workflow refuses to invent a product goal", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-needs-goal-");
+  const fixture = await makeFixtureProject("agentwolf-auto-needs-goal-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {});
 
@@ -26,7 +26,7 @@ test("advance_workflow refuses to invent a product goal", async () => {
 });
 
 test("advance_workflow does not ask unnecessary questions for a concrete product goal", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-no-question-");
+  const fixture = await makeFixtureProject("agentwolf-auto-no-question-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
       product_goal: "Build an automated planner that registers a user product goal, scans the repository, creates requirements and ADR artifacts, records backlog, and dispatches Codex for implementation.",
@@ -50,7 +50,7 @@ test("advance_workflow does not ask unnecessary questions for a concrete product
 });
 
 test("advance_workflow stops to ask when a high-impact ambiguity is discovered during planning", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-discovered-question-");
+  const fixture = await makeFixtureProject("agentwolf-auto-discovered-question-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
       product_goal: "Add production login and RBAC for admin users.",
@@ -74,7 +74,7 @@ test("advance_workflow stops to ask when a high-impact ambiguity is discovered d
 });
 
 test("advance_workflow can auto-plan and record artifacts until external implementation is required", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-plan-");
+  const fixture = await makeFixtureProject("agentwolf-auto-plan-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
       product_goal: "Build a traceable delivery feature that generates a role plan and dispatches the developer without manual tool sequencing.",
@@ -96,7 +96,7 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
     const requirements = await readFile(join(fixture.projectRoot, "docs", "ai-artifacts", "requirements", result.actions.find((action) => action.artifact_type === "requirements").result.id + ".md"), "utf8");
     assert.match(requirements, /Success Criteria/);
 
-    const trace = await readJsonl(join(fixture.projectRoot, ".vibe-engineering", "trace-ledger.jsonl"));
+    const trace = await readJsonl(join(fixture.projectRoot, ".agentwolf", "trace-ledger.jsonl"));
     assert.ok(trace.some((event) => event.type === "workflow_advanced" && event.status === "external_agent_required"));
     assert.ok(trace.some((event) => event.type === "backlog_recorded"));
 
@@ -109,7 +109,7 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
 });
 
 test("advance_workflow routes read-only analysis goals to reviewer instead of developer", async () => {
-  const fixture = await makeFixtureProject("aiwf-auto-analysis-route-");
+  const fixture = await makeFixtureProject("agentwolf-auto-analysis-route-");
   try {
     const result = await advanceWorkflow(fixture.projectRoot, {
       product_goal: "Analyze the current repository, identify prioritized adoption improvements, and do not modify source code during this analysis.",

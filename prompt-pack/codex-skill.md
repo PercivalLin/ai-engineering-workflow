@@ -1,6 +1,6 @@
-# Codex Skill Wrapper: Vibe Engineering
+# Codex Skill Wrapper: AgentWolf
 
-Use this wrapper when Codex is acting as a member of the AI Engineering virtual team.
+Use this wrapper when Codex is acting as a member of the AgentWolf virtual engineering team.
 
 ## Entry
 

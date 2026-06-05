@@ -22,7 +22,7 @@ export async function initProject(projectRoot) {
 
   if (!(await exists(paths.projectYaml))) {
     await writeText(paths.projectYaml, [
-      "name: AI Engineering Project",
+      "name: AgentWolf Project",
       "risk_mode: high_compliance",
       "automation:",
       "  allow_code_changes: true",

@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { makeFixtureProject } from "./helpers.mjs";
 
 const execFileAsync = promisify(execFile);
-const bin = join(process.cwd(), "bin", "vibe-engineering.mjs");
+const bin = join(process.cwd(), "bin", "agentwolf.mjs");
 
 async function cli(projectRoot, args) {
   const { stdout } = await execFileAsync("node", [bin, "--project", projectRoot, ...args], {
@@ -19,7 +19,7 @@ async function cli(projectRoot, args) {
 }
 
 test("debug CLI exercises the main operator workflow in an isolated project", async () => {
-  const fixture = await makeFixtureProject("aiwf-cli-");
+  const fixture = await makeFixtureProject("agentwolf-cli-");
   try {
     assert.equal((await cli(fixture.projectRoot, ["init"])).ok, true);
     const goal = await cli(fixture.projectRoot, [

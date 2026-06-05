@@ -1,6 +1,6 @@
 # Security Policy
 
-Vibe Engineering records product goals, decisions, task packets, commands, evidence, ChangeSets, and audit bundles. Those records can contain sensitive project information.
+AgentWolf records product goals, decisions, task packets, commands, evidence, ChangeSets, and audit bundles. Those records can contain sensitive project information.
 
 ## Supported Versions
 
@@ -10,7 +10,7 @@ The project is pre-1.0. Security fixes should target the latest published versio
 
 Please report vulnerabilities through GitHub Security Advisories:
 
-https://github.com/PercivalLin/vibe-engineering/security/advisories/new
+https://github.com/PercivalLin/agentwolf/security/advisories/new
 
 If GitHub Security Advisories are unavailable for your account, contact the maintainer through the GitHub profile linked from the repository owner.
 
@@ -38,7 +38,7 @@ Before publishing logs, examples, screenshots, audit bundles, or generated memor
 Project runtime directories are ignored by default in this repository:
 
 ```text
-.vibe-engineering/
+.agentwolf/
 docs/ai-artifacts/
 ```
 

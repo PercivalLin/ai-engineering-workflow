@@ -6,7 +6,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local runtime state generated when this tool is used against a repository.
-.vibe-engineering/
+.agentwolf/
 .ai-engineering/
 docs/ai-artifacts/
 

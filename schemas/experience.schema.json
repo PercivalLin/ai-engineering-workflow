@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vibe-engineering.local/schemas/experience.schema.json",
+  "$id": "https://agentwolf.local/schemas/experience.schema.json",
   "title": "Global Engineering Experience",
   "type": "object",
   "required": ["id", "type", "scope", "trigger", "lesson", "evidence", "confidence", "status"],

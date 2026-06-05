@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vibe-engineering.local/schemas/decision.schema.json",
-  "title": "AI Engineering User Decision",
+  "$id": "https://agentwolf.local/schemas/decision.schema.json",
+  "title": "AgentWolf User Decision",
   "type": "object",
   "required": [
     "decision_id",

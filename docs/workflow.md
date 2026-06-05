@@ -45,7 +45,7 @@ MCP responses include:
 {
   "current_role": "developer",
   "current_phase": "build_loop",
-  "progress_message": "[Vibe Engineering] Developer is active. Phase: build_loop. Status: external_agent_required.",
+  "progress_message": "[AgentWolf] Developer is active. Phase: build_loop. Status: external_agent_required.",
   "agent_feedback_prompt": "You are currently acting as: Developer.\nWorkflow phase: build_loop.\nWorkflow status: external_agent_required.\nTell the user this status briefly before continuing."
 }
 ```

@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains the longer-form documentation for Vibe Engineering.
+This directory contains the longer-form documentation for AgentWolf.
 
 Start with the root `README.md` if you are evaluating the project for the first time. Use these docs when you want to operate, extend, or publish it.
 

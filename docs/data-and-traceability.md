@@ -1,21 +1,21 @@
 # Data And Traceability
 
-Vibe Engineering separates project-local audit data from global engineering memory.
+AgentWolf separates project-local audit data from global engineering memory.
 
 ## Project-Local Data
 
 Project data is written under the target repository:
 
 ```text
-<target-project>/.vibe-engineering/project.yaml
-<target-project>/.vibe-engineering/workflow-state.json
-<target-project>/.vibe-engineering/trace-ledger.jsonl
-<target-project>/.vibe-engineering/decision-log.jsonl
-<target-project>/.vibe-engineering/evidence/
-<target-project>/.vibe-engineering/changesets/
-<target-project>/.vibe-engineering/context/
-<target-project>/.vibe-engineering/context/task-packets/
-<target-project>/.vibe-engineering/audit-bundles/
+<target-project>/.agentwolf/project.yaml
+<target-project>/.agentwolf/workflow-state.json
+<target-project>/.agentwolf/trace-ledger.jsonl
+<target-project>/.agentwolf/decision-log.jsonl
+<target-project>/.agentwolf/evidence/
+<target-project>/.agentwolf/changesets/
+<target-project>/.agentwolf/context/
+<target-project>/.agentwolf/context/task-packets/
+<target-project>/.agentwolf/audit-bundles/
 <target-project>/docs/ai-artifacts/
 ```
 
@@ -23,30 +23,30 @@ Important files:
 
 | Path | Purpose |
 | --- | --- |
-| `.vibe-engineering/workflow-state.json` | Current phase, active goal, backlog, decisions, artifacts, evidence, and gate state. |
-| `.vibe-engineering/trace-ledger.jsonl` | Append-oriented timeline of workflow events. |
-| `.vibe-engineering/decision-log.jsonl` | User answers, AI assumptions, and high-impact decisions. |
-| `.vibe-engineering/evidence/` | Test, scan, review, security, deployment, and manual evidence records. |
-| `.vibe-engineering/changesets/` | ChangeSet metadata and patch snapshots. |
-| `.vibe-engineering/context/task-packets/` | Role packets dispatched to external agents. |
-| `.vibe-engineering/audit-bundles/` | Exported audit summaries and traceability matrices. |
+| `.agentwolf/workflow-state.json` | Current phase, active goal, backlog, decisions, artifacts, evidence, and gate state. |
+| `.agentwolf/trace-ledger.jsonl` | Append-oriented timeline of workflow events. |
+| `.agentwolf/decision-log.jsonl` | User answers, AI assumptions, and high-impact decisions. |
+| `.agentwolf/evidence/` | Test, scan, review, security, deployment, and manual evidence records. |
+| `.agentwolf/changesets/` | ChangeSet metadata and patch snapshots. |
+| `.agentwolf/context/task-packets/` | Role packets dispatched to external agents. |
+| `.agentwolf/audit-bundles/` | Exported audit summaries and traceability matrices. |
 | `docs/ai-artifacts/` | Requirements, ADRs, release notes, retrospectives, and other generated artifacts. |
 
 ## Global Memory
 
-Global memory is stored at `VIBE_ENGINEERING_HOME` or `~/.vibe-engineering`:
+Global memory is stored at `AGENTWOLF_HOME` or `~/.agentwolf`:
 
 ```text
-~/.vibe-engineering/memory/principles/
-~/.vibe-engineering/memory/playbooks/
-~/.vibe-engineering/memory/anti-patterns/
-~/.vibe-engineering/memory/cases/
-~/.vibe-engineering/memory/rules/
-~/.vibe-engineering/memory/role-checklists/
-~/.vibe-engineering/memory/stack-knowledge/
-~/.vibe-engineering/memory/organization-preferences/
-~/.vibe-engineering/agents/
-~/.vibe-engineering/sandbox-rules/
+~/.agentwolf/memory/principles/
+~/.agentwolf/memory/playbooks/
+~/.agentwolf/memory/anti-patterns/
+~/.agentwolf/memory/cases/
+~/.agentwolf/memory/rules/
+~/.agentwolf/memory/role-checklists/
+~/.agentwolf/memory/stack-knowledge/
+~/.agentwolf/memory/organization-preferences/
+~/.agentwolf/agents/
+~/.agentwolf/sandbox-rules/
 ```
 
 Global memory should be cross-project and evidence-backed. Do not write lessons into global memory only because they sound plausible.
@@ -74,12 +74,12 @@ Every code modification should be recorded as a ChangeSet with:
 ## Inspection Commands
 
 ```bash
-tail -n 20 <target-project>/.vibe-engineering/trace-ledger.jsonl
-tail -n 20 <target-project>/.vibe-engineering/decision-log.jsonl
-find <target-project>/.vibe-engineering -maxdepth 2 -type f | sort
-find ~/.vibe-engineering -maxdepth 3 -type f | sort
+tail -n 20 <target-project>/.agentwolf/trace-ledger.jsonl
+tail -n 20 <target-project>/.agentwolf/decision-log.jsonl
+find <target-project>/.agentwolf -maxdepth 2 -type f | sort
+find ~/.agentwolf -maxdepth 3 -type f | sort
 ```
 
 ## Privacy Warning
 
-Audit logs and task packets can include product strategy, file paths, private URLs, customer names, and implementation details. Do not publish `.vibe-engineering/` or `docs/ai-artifacts/` unless the target project has decided those artifacts are public.
+Audit logs and task packets can include product strategy, file paths, private URLs, customer names, and implementation details. Do not publish `.agentwolf/` or `docs/ai-artifacts/` unless the target project has decided those artifacts are public.

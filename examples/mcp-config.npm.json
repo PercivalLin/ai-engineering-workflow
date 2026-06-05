@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "vibe-engineering": {
+    "agentwolf": {
       "command": "npx",
-      "args": ["-y", "vibe-engineering", "server"],
+      "args": ["-y", "agentwolf", "server"],
       "env": {
-        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
+        "AGENTWOLF_HOME": "/Users/you/.agentwolf"
       }
     }
   }

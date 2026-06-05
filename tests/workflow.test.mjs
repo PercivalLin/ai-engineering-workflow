@@ -10,8 +10,8 @@ import { askUserDecision, dispatchAgentTask, getRoleAction, recordUserDecision, 
 import { exportAuditBundle, recordArtifact, recordBacklog, recordChangeset, recordEvidence } from "../src/core/trace.mjs";
 
 test("runs the core workflow and exports an audit bundle", async () => {
-  const projectRoot = await mkdtemp(join(tmpdir(), "aiwf-project-"));
-  process.env.VIBE_ENGINEERING_HOME = await mkdtemp(join(tmpdir(), "aiwf-global-"));
+  const projectRoot = await mkdtemp(join(tmpdir(), "agentwolf-project-"));
+  process.env.AGENTWOLF_HOME = await mkdtemp(join(tmpdir(), "agentwolf-global-"));
   await writeFile(join(projectRoot, "package.json"), JSON.stringify({
     name: "fixture",
     type: "module",

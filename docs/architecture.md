@@ -1,13 +1,13 @@
 # Architecture
 
-Vibe Engineering is a workflow kernel around external coding agents. Codex, Claude Code, Cursor, Gemini CLI, or another execution model can do the code work; this project owns the engineering process around that work.
+AgentWolf is a workflow kernel around external coding agents. Codex, Claude Code, Cursor, Gemini CLI, or another execution model can do the code work; this project owns the engineering process around that work.
 
 ## Component Map
 
 ```mermaid
 flowchart LR
   User["User product goal"] --> Agent["Agent harness"]
-  Agent --> MCP["Vibe Engineering MCP Server"]
+  Agent --> MCP["AgentWolf MCP Server"]
   MCP --> Runtime["Workflow Runtime"]
   Runtime --> Context["Project Context Scanner"]
   Runtime --> Memory["Global Memory Store"]

@@ -181,25 +181,25 @@ async function main() {
     return;
   }
 
-  process.stdout.write(`Vibe Engineering
+  process.stdout.write(`AgentWolf
 
 Usage:
-  vibe-engineering server
-  vibe-engineering advance --goal "User product goal..." --adapter codex
-  vibe-engineering init
-  vibe-engineering create-goal --title "..." --description "..." --risk high
-  vibe-engineering scan
-  vibe-engineering memory --query "database migration"
-  vibe-engineering role --role architect
-  vibe-engineering ask --topic "target users"
-  vibe-engineering answer --id decision_x --answer "..."
-  vibe-engineering dispatch --adapter codex --role developer --objective "..."
-  vibe-engineering changeset --role developer --agent codex
-  vibe-engineering evidence --type test --outcome passed --summary "npm test"
-  vibe-engineering artifact --type requirements --title "PRD" --content "..."
-  vibe-engineering backlog --title "Implement slice" --done "tests pass|changeset recorded"
-  vibe-engineering gate --phase verification_loop
-  vibe-engineering export
+  agentwolf server
+  agentwolf advance --goal "User product goal..." --adapter codex
+  agentwolf init
+  agentwolf create-goal --title "..." --description "..." --risk high
+  agentwolf scan
+  agentwolf memory --query "database migration"
+  agentwolf role --role architect
+  agentwolf ask --topic "target users"
+  agentwolf answer --id decision_x --answer "..."
+  agentwolf dispatch --adapter codex --role developer --objective "..."
+  agentwolf changeset --role developer --agent codex
+  agentwolf evidence --type test --outcome passed --summary "npm test"
+  agentwolf artifact --type requirements --title "PRD" --content "..."
+  agentwolf backlog --title "Implement slice" --done "tests pass|changeset recorded"
+  agentwolf gate --phase verification_loop
+  agentwolf export
 `);
 }
 

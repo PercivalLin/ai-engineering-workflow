@@ -67,8 +67,8 @@ advance_workflow
 ## Lower-Level Debugging Commands
 
 ```bash
-vibe-engineering scan --project /absolute/path/to/target-product
-vibe-engineering role --project /absolute/path/to/target-product --role pm
-vibe-engineering gate --project /absolute/path/to/target-product
-vibe-engineering export --project /absolute/path/to/target-product
+agentwolf scan --project /absolute/path/to/target-product
+agentwolf role --project /absolute/path/to/target-product --role pm
+agentwolf gate --project /absolute/path/to/target-product
+agentwolf export --project /absolute/path/to/target-product
 ```

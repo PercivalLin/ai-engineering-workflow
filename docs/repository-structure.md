@@ -1,6 +1,6 @@
 # Repository Structure
 
-Vibe Engineering is organized so new contributors can quickly distinguish runtime code, schemas, prompt packs, docs, examples, and release infrastructure.
+AgentWolf is organized so new contributors can quickly distinguish runtime code, schemas, prompt packs, docs, examples, and release infrastructure.
 
 ## Top-Level Layout
 
@@ -47,7 +47,7 @@ Vibe Engineering is organized so new contributors can quickly distinguish runtim
 | Surface | Location | Notes |
 | --- | --- | --- |
 | MCP server | `src/server.mjs` | Primary product interface. |
-| CLI | `bin/vibe-engineering.mjs` | Debugging, smoke tests, and local inspection. |
+| CLI | `bin/agentwolf.mjs` | Debugging, smoke tests, and local inspection. |
 | Schemas | `schemas/` | Portable record contracts for ChangeSets, decisions, evidence, and experience. |
 | Prompt packs | `prompt-pack/` | Fallback guidance for agents without MCP support. |
 
@@ -66,7 +66,7 @@ Vibe Engineering is organized so new contributors can quickly distinguish runtim
 Runtime data belongs to the target project and is ignored by this repository:
 
 ```text
-.vibe-engineering/
+.agentwolf/
 docs/ai-artifacts/
 ```
 

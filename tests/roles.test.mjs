@@ -23,7 +23,7 @@ test("every virtual team role has an executable role prompt contract", () => {
 });
 
 test("role task packets expose detailed prompts for every role", async () => {
-  const fixture = await makeFixtureProject("aiwf-roles-");
+  const fixture = await makeFixtureProject("agentwolf-roles-");
   try {
     await initProject(fixture.projectRoot);
     await createGoal(fixture.projectRoot, {

@@ -12,7 +12,7 @@ Use this checklist when preparing a GitHub release or npm publish.
 - Runtime output is ignored:
 
 ```text
-.vibe-engineering/
+.agentwolf/
 docs/ai-artifacts/
 ```
 
@@ -24,19 +24,19 @@ After creating the public repository, update `package.json` with real URLs:
 {
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<owner>/vibe-engineering.git"
+    "url": "git+https://github.com/<owner>/agentwolf.git"
   },
   "bugs": {
-    "url": "https://github.com/<owner>/vibe-engineering/issues"
+    "url": "https://github.com/<owner>/agentwolf/issues"
   },
-  "homepage": "https://github.com/<owner>/vibe-engineering#readme"
+  "homepage": "https://github.com/<owner>/agentwolf#readme"
 }
 ```
 
 Then push:
 
 ```bash
-git remote add origin git@github.com:<owner>/vibe-engineering.git
+git remote add origin git@github.com:<owner>/agentwolf.git
 git push -u origin main
 ```
 
@@ -45,7 +45,7 @@ git push -u origin main
 Check package name availability:
 
 ```bash
-npm view vibe-engineering version
+npm view agentwolf version
 ```
 
 An npm 404 usually means the package name is not currently published.

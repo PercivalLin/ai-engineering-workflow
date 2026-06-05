@@ -15,16 +15,16 @@ This project follows semantic versioning once published.
 
 ### Changed
 
-- Rename the public project and npm package to Vibe Engineering / `vibe-engineering`.
-- Rename the primary CLI entrypoint to `vibe-engineering`.
-- Use `VIBE_ENGINEERING_HOME` and `.vibe-engineering` as the new default runtime names while keeping compatibility with the legacy environment variable and project directory.
+- Rename the public project and npm package to AgentWolf / `agentwolf`.
+- Rename the primary CLI entrypoint to `agentwolf`.
+- Use `AGENTWOLF_HOME` and `.agentwolf` as the new default runtime names while keeping compatibility with the legacy environment variable and project directory.
 - Add `npm audit --omit=dev` to local CI verification.
 
 ## 0.1.0 - 2026-06-05
 
 ### Added
 
-- MCP server exposing the AI engineering workflow runtime.
+- MCP server exposing the AgentWolf runtime.
 - `advance_workflow` high-level entrypoint for automatic workflow advancement.
 - Project-local trace ledger, decision log, evidence records, ChangeSets, task packets, and audit bundles.
 - Global engineering memory layout for principles, playbooks, anti-patterns, cases, rules, stack knowledge, role checklists, and organization preferences.
