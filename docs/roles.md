@@ -1,6 +1,6 @@
 # Roles
 
-AI Engineering Workflow uses explicit virtual team roles so external agents do not act as one vague all-purpose developer.
+Vibe Engineering uses explicit virtual team roles so external agents do not act as one vague all-purpose developer.
 
 Each role definition includes:
 

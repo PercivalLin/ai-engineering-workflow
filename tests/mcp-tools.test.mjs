@@ -46,7 +46,7 @@ test("MCP server exposes and executes every planned tool", async () => {
   try {
     const mcp = createMcpHarness();
     const init = await mcp.call("initialize", { protocolVersion: "2024-11-05" });
-    assert.equal(init.serverInfo.name, "ai-engineering-workflow");
+    assert.equal(init.serverInfo.name, "vibe-engineering");
 
     const list = await mcp.call("tools/list");
     const toolNames = list.tools.map((item) => item.name).sort();

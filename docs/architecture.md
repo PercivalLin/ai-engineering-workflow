@@ -1,13 +1,13 @@
 # Architecture
 
-AI Engineering Workflow is a workflow kernel around external coding agents. Codex, Claude Code, Cursor, Gemini CLI, or another execution model can do the code work; this project owns the engineering process around that work.
+Vibe Engineering is a workflow kernel around external coding agents. Codex, Claude Code, Cursor, Gemini CLI, or another execution model can do the code work; this project owns the engineering process around that work.
 
 ## Component Map
 
 ```mermaid
 flowchart LR
   User["User product goal"] --> Agent["Agent harness"]
-  Agent --> MCP["AI Engineering Workflow MCP Server"]
+  Agent --> MCP["Vibe Engineering MCP Server"]
   MCP --> Runtime["Workflow Runtime"]
   Runtime --> Context["Project Context Scanner"]
   Runtime --> Memory["Global Memory Store"]

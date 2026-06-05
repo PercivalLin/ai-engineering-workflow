@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "ai-engineering-workflow": {
+    "vibe-engineering": {
       "command": "npx",
-      "args": ["-y", "ai-engineering-workflow", "server"],
+      "args": ["-y", "vibe-engineering", "server"],
       "env": {
-        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
       }
     }
   }

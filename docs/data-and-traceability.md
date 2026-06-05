@@ -1,21 +1,21 @@
 # Data And Traceability
 
-AI Engineering Workflow separates project-local audit data from global engineering memory.
+Vibe Engineering separates project-local audit data from global engineering memory.
 
 ## Project-Local Data
 
 Project data is written under the target repository:
 
 ```text
-<target-project>/.ai-engineering/project.yaml
-<target-project>/.ai-engineering/workflow-state.json
-<target-project>/.ai-engineering/trace-ledger.jsonl
-<target-project>/.ai-engineering/decision-log.jsonl
-<target-project>/.ai-engineering/evidence/
-<target-project>/.ai-engineering/changesets/
-<target-project>/.ai-engineering/context/
-<target-project>/.ai-engineering/context/task-packets/
-<target-project>/.ai-engineering/audit-bundles/
+<target-project>/.vibe-engineering/project.yaml
+<target-project>/.vibe-engineering/workflow-state.json
+<target-project>/.vibe-engineering/trace-ledger.jsonl
+<target-project>/.vibe-engineering/decision-log.jsonl
+<target-project>/.vibe-engineering/evidence/
+<target-project>/.vibe-engineering/changesets/
+<target-project>/.vibe-engineering/context/
+<target-project>/.vibe-engineering/context/task-packets/
+<target-project>/.vibe-engineering/audit-bundles/
 <target-project>/docs/ai-artifacts/
 ```
 
@@ -23,30 +23,30 @@ Important files:
 
 | Path | Purpose |
 | --- | --- |
-| `.ai-engineering/workflow-state.json` | Current phase, active goal, backlog, decisions, artifacts, evidence, and gate state. |
-| `.ai-engineering/trace-ledger.jsonl` | Append-oriented timeline of workflow events. |
-| `.ai-engineering/decision-log.jsonl` | User answers, AI assumptions, and high-impact decisions. |
-| `.ai-engineering/evidence/` | Test, scan, review, security, deployment, and manual evidence records. |
-| `.ai-engineering/changesets/` | ChangeSet metadata and patch snapshots. |
-| `.ai-engineering/context/task-packets/` | Role packets dispatched to external agents. |
-| `.ai-engineering/audit-bundles/` | Exported audit summaries and traceability matrices. |
+| `.vibe-engineering/workflow-state.json` | Current phase, active goal, backlog, decisions, artifacts, evidence, and gate state. |
+| `.vibe-engineering/trace-ledger.jsonl` | Append-oriented timeline of workflow events. |
+| `.vibe-engineering/decision-log.jsonl` | User answers, AI assumptions, and high-impact decisions. |
+| `.vibe-engineering/evidence/` | Test, scan, review, security, deployment, and manual evidence records. |
+| `.vibe-engineering/changesets/` | ChangeSet metadata and patch snapshots. |
+| `.vibe-engineering/context/task-packets/` | Role packets dispatched to external agents. |
+| `.vibe-engineering/audit-bundles/` | Exported audit summaries and traceability matrices. |
 | `docs/ai-artifacts/` | Requirements, ADRs, release notes, retrospectives, and other generated artifacts. |
 
 ## Global Memory
 
-Global memory is stored at `AI_ENGINEERING_HOME` or `~/.ai-engineering`:
+Global memory is stored at `VIBE_ENGINEERING_HOME` or `~/.vibe-engineering`:
 
 ```text
-~/.ai-engineering/memory/principles/
-~/.ai-engineering/memory/playbooks/
-~/.ai-engineering/memory/anti-patterns/
-~/.ai-engineering/memory/cases/
-~/.ai-engineering/memory/rules/
-~/.ai-engineering/memory/role-checklists/
-~/.ai-engineering/memory/stack-knowledge/
-~/.ai-engineering/memory/organization-preferences/
-~/.ai-engineering/agents/
-~/.ai-engineering/sandbox-rules/
+~/.vibe-engineering/memory/principles/
+~/.vibe-engineering/memory/playbooks/
+~/.vibe-engineering/memory/anti-patterns/
+~/.vibe-engineering/memory/cases/
+~/.vibe-engineering/memory/rules/
+~/.vibe-engineering/memory/role-checklists/
+~/.vibe-engineering/memory/stack-knowledge/
+~/.vibe-engineering/memory/organization-preferences/
+~/.vibe-engineering/agents/
+~/.vibe-engineering/sandbox-rules/
 ```
 
 Global memory should be cross-project and evidence-backed. Do not write lessons into global memory only because they sound plausible.
@@ -74,12 +74,12 @@ Every code modification should be recorded as a ChangeSet with:
 ## Inspection Commands
 
 ```bash
-tail -n 20 <target-project>/.ai-engineering/trace-ledger.jsonl
-tail -n 20 <target-project>/.ai-engineering/decision-log.jsonl
-find <target-project>/.ai-engineering -maxdepth 2 -type f | sort
-find ~/.ai-engineering -maxdepth 3 -type f | sort
+tail -n 20 <target-project>/.vibe-engineering/trace-ledger.jsonl
+tail -n 20 <target-project>/.vibe-engineering/decision-log.jsonl
+find <target-project>/.vibe-engineering -maxdepth 2 -type f | sort
+find ~/.vibe-engineering -maxdepth 3 -type f | sort
 ```
 
 ## Privacy Warning
 
-Audit logs and task packets can include product strategy, file paths, private URLs, customer names, and implementation details. Do not publish `.ai-engineering/` or `docs/ai-artifacts/` unless the target project has decided those artifacts are public.
+Audit logs and task packets can include product strategy, file paths, private URLs, customer names, and implementation details. Do not publish `.vibe-engineering/` or `docs/ai-artifacts/` unless the target project has decided those artifacts are public.

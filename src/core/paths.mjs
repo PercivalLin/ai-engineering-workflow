@@ -1,12 +1,13 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 
 export function globalRoot() {
-  return process.env.AI_ENGINEERING_HOME || join(homedir(), ".ai-engineering");
+  return process.env.VIBE_ENGINEERING_HOME || process.env.AI_ENGINEERING_HOME || join(homedir(), ".vibe-engineering");
 }
 
 export function projectPaths(projectRoot) {
-  const project = join(projectRoot, ".ai-engineering");
+  const project = projectRuntimeDir(projectRoot);
   return {
     root: projectRoot,
     project,
@@ -25,6 +26,13 @@ export function projectPaths(projectRoot) {
     release: join(projectRoot, "docs", "ai-artifacts", "release"),
     retro: join(projectRoot, "docs", "ai-artifacts", "retro")
   };
+}
+
+function projectRuntimeDir(projectRoot) {
+  const current = join(projectRoot, ".vibe-engineering");
+  const legacy = join(projectRoot, ".ai-engineering");
+  if (!existsSync(current) && existsSync(legacy)) return legacy;
+  return current;
 }
 
 export function globalPaths() {

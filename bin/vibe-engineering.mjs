@@ -181,25 +181,25 @@ async function main() {
     return;
   }
 
-  process.stdout.write(`AI Engineering Workflow
+  process.stdout.write(`Vibe Engineering
 
 Usage:
-  ai-engineering server
-  ai-engineering advance --goal "User product goal..." --adapter codex
-  ai-engineering init
-  ai-engineering create-goal --title "..." --description "..." --risk high
-  ai-engineering scan
-  ai-engineering memory --query "database migration"
-  ai-engineering role --role architect
-  ai-engineering ask --topic "target users"
-  ai-engineering answer --id decision_x --answer "..."
-  ai-engineering dispatch --adapter codex --role developer --objective "..."
-  ai-engineering changeset --role developer --agent codex
-  ai-engineering evidence --type test --outcome passed --summary "npm test"
-  ai-engineering artifact --type requirements --title "PRD" --content "..."
-  ai-engineering backlog --title "Implement slice" --done "tests pass|changeset recorded"
-  ai-engineering gate --phase verification_loop
-  ai-engineering export
+  vibe-engineering server
+  vibe-engineering advance --goal "User product goal..." --adapter codex
+  vibe-engineering init
+  vibe-engineering create-goal --title "..." --description "..." --risk high
+  vibe-engineering scan
+  vibe-engineering memory --query "database migration"
+  vibe-engineering role --role architect
+  vibe-engineering ask --topic "target users"
+  vibe-engineering answer --id decision_x --answer "..."
+  vibe-engineering dispatch --adapter codex --role developer --objective "..."
+  vibe-engineering changeset --role developer --agent codex
+  vibe-engineering evidence --type test --outcome passed --summary "npm test"
+  vibe-engineering artifact --type requirements --title "PRD" --content "..."
+  vibe-engineering backlog --title "Implement slice" --done "tests pass|changeset recorded"
+  vibe-engineering gate --phase verification_loop
+  vibe-engineering export
 `);
 }
 

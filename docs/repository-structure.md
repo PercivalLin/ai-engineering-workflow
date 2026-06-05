@@ -1,6 +1,6 @@
 # Repository Structure
 
-AI Engineering Workflow is organized so new contributors can quickly distinguish runtime code, schemas, prompt packs, docs, examples, and release infrastructure.
+Vibe Engineering is organized so new contributors can quickly distinguish runtime code, schemas, prompt packs, docs, examples, and release infrastructure.
 
 ## Top-Level Layout
 
@@ -47,7 +47,7 @@ AI Engineering Workflow is organized so new contributors can quickly distinguish
 | Surface | Location | Notes |
 | --- | --- | --- |
 | MCP server | `src/server.mjs` | Primary product interface. |
-| CLI | `bin/ai-engineering.mjs` | Debugging, smoke tests, and local inspection. |
+| CLI | `bin/vibe-engineering.mjs` | Debugging, smoke tests, and local inspection. |
 | Schemas | `schemas/` | Portable record contracts for ChangeSets, decisions, evidence, and experience. |
 | Prompt packs | `prompt-pack/` | Fallback guidance for agents without MCP support. |
 
@@ -66,7 +66,7 @@ AI Engineering Workflow is organized so new contributors can quickly distinguish
 Runtime data belongs to the target project and is ignored by this repository:
 
 ```text
-.ai-engineering/
+.vibe-engineering/
 docs/ai-artifacts/
 ```
 

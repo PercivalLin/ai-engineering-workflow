@@ -11,7 +11,7 @@ import { exportAuditBundle, recordArtifact, recordBacklog, recordChangeset, reco
 
 test("runs the core workflow and exports an audit bundle", async () => {
   const projectRoot = await mkdtemp(join(tmpdir(), "aiwf-project-"));
-  process.env.AI_ENGINEERING_HOME = await mkdtemp(join(tmpdir(), "aiwf-global-"));
+  process.env.VIBE_ENGINEERING_HOME = await mkdtemp(join(tmpdir(), "aiwf-global-"));
   await writeFile(join(projectRoot, "package.json"), JSON.stringify({
     name: "fixture",
     type: "module",

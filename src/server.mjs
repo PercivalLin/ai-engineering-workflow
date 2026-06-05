@@ -263,8 +263,8 @@ async function handleRequest(request) {
       protocolVersion: request.params?.protocolVersion || "2024-11-05",
       capabilities: { tools: {} },
       serverInfo: {
-        name: "ai-engineering-workflow",
-        version: "0.1.0"
+        name: "vibe-engineering",
+        version: "0.1.1"
       }
     };
   }

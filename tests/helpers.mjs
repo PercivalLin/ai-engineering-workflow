@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 export async function makeFixtureProject(prefix = "aiwf-fixture-") {
   const projectRoot = await mkdtemp(join(tmpdir(), prefix));
   const globalRoot = await mkdtemp(join(tmpdir(), `${prefix}global-`));
-  const previousHome = process.env.AI_ENGINEERING_HOME;
-  process.env.AI_ENGINEERING_HOME = globalRoot;
+  const previousHome = process.env.VIBE_ENGINEERING_HOME;
+  process.env.VIBE_ENGINEERING_HOME = globalRoot;
   await writeFile(join(projectRoot, "package.json"), JSON.stringify({
     name: "fixture",
     type: "module",
@@ -26,9 +26,9 @@ export async function makeFixtureProject(prefix = "aiwf-fixture-") {
     globalRoot,
     restoreEnv() {
       if (previousHome === undefined) {
-        delete process.env.AI_ENGINEERING_HOME;
+        delete process.env.VIBE_ENGINEERING_HOME;
       } else {
-        process.env.AI_ENGINEERING_HOME = previousHome;
+        process.env.VIBE_ENGINEERING_HOME = previousHome;
       }
     }
   };

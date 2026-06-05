@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { makeFixtureProject } from "./helpers.mjs";
 
 const execFileAsync = promisify(execFile);
-const bin = join(process.cwd(), "bin", "ai-engineering.mjs");
+const bin = join(process.cwd(), "bin", "vibe-engineering.mjs");
 
 async function cli(projectRoot, args) {
   const { stdout } = await execFileAsync("node", [bin, "--project", projectRoot, ...args], {

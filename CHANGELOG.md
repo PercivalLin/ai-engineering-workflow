@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning once published.
 
-## 0.1.1 - Unreleased
+## 0.1.1 - 2026-06-05
 
 ### Fixed
 
@@ -15,6 +15,9 @@ This project follows semantic versioning once published.
 
 ### Changed
 
+- Rename the public project and npm package to Vibe Engineering / `vibe-engineering`.
+- Rename the primary CLI entrypoint to `vibe-engineering`.
+- Use `VIBE_ENGINEERING_HOME` and `.vibe-engineering` as the new default runtime names while keeping compatibility with the legacy environment variable and project directory.
 - Add `npm audit --omit=dev` to local CI verification.
 
 ## 0.1.0 - 2026-06-05

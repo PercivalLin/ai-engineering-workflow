@@ -391,7 +391,7 @@ function nextInstructionForStatus(result, { role, phase, dispatch }) {
 function formatProgressMessage({ projectRoot, role, phase, status, reason, actionCount = null, next = "" }) {
   const roleTitle = ROLES[role]?.title || role;
   const parts = [
-    `[AI Engineering Workflow] ${roleTitle} is active.`,
+    `[Vibe Engineering] ${roleTitle} is active.`,
     `Phase: ${phase}.`,
     `Status: ${status}.`
   ];

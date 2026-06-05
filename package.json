@@ -1,15 +1,15 @@
 {
-  "name": "ai-engineering-workflow",
-  "version": "0.1.0",
-  "description": "Agent-neutral AI engineering team runtime with global memory, workflow gates, and traceable change history.",
+  "name": "vibe-engineering",
+  "version": "0.1.1",
+  "description": "Agent-neutral virtual engineering team runtime with workflow gates, global memory, and traceable ChangeSets.",
   "type": "module",
-  "homepage": "https://github.com/PercivalLin/ai-engineering-workflow#readme",
+  "homepage": "https://github.com/PercivalLin/vibe-engineering#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PercivalLin/ai-engineering-workflow.git"
+    "url": "git+https://github.com/PercivalLin/vibe-engineering.git"
   },
   "bugs": {
-    "url": "https://github.com/PercivalLin/ai-engineering-workflow/issues"
+    "url": "https://github.com/PercivalLin/vibe-engineering/issues"
   },
   "keywords": [
     "ai",
@@ -24,18 +24,18 @@
     "automation"
   ],
   "bin": {
-    "ai-engineering": "bin/ai-engineering.mjs"
+    "vibe-engineering": "bin/vibe-engineering.mjs"
   },
   "scripts": {
-    "start": "node ./bin/ai-engineering.mjs server",
-    "check": "node --check bin/ai-engineering.mjs && find src tests -name '*.mjs' -print -exec node --check {} \\;",
+    "start": "node ./bin/vibe-engineering.mjs server",
+    "check": "node --check bin/vibe-engineering.mjs && find src tests -name '*.mjs' -print -exec node --check {} \\;",
     "test": "node --test",
     "verify": "npm run check && npm test",
     "audit": "npm audit --omit=dev",
     "pack:dry": "npm pack --dry-run",
     "ci": "npm run verify && npm run audit && npm run pack:dry",
     "prepublishOnly": "npm run verify",
-    "smoke": "node ./bin/ai-engineering.mjs init && node ./bin/ai-engineering.mjs create-goal --title \"Smoke goal\" --description \"Verify runtime wiring\" && node ./bin/ai-engineering.mjs scan && node ./bin/ai-engineering.mjs role --role pm && node ./bin/ai-engineering.mjs export"
+    "smoke": "node ./bin/vibe-engineering.mjs init && node ./bin/vibe-engineering.mjs create-goal --title \"Smoke goal\" --description \"Verify runtime wiring\" && node ./bin/vibe-engineering.mjs scan && node ./bin/vibe-engineering.mjs role --role pm && node ./bin/vibe-engineering.mjs export"
   },
   "engines": {
     "node": ">=20"

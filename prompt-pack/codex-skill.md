@@ -1,4 +1,4 @@
-# Codex Skill Wrapper: AI Engineering Workflow
+# Codex Skill Wrapper: Vibe Engineering
 
 Use this wrapper when Codex is acting as a member of the AI Engineering virtual team.
 

@@ -1,12 +1,12 @@
-<h1 align="center">AI Engineering Workflow</h1>
+<h1 align="center">Vibe Engineering</h1>
 
 <p align="center">
   <strong>Turn AI coding agents into a traceable virtual engineering team.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PercivalLin/ai-engineering-workflow/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://www.npmjs.com/package/ai-engineering-workflow"><img alt="npm" src="https://img.shields.io/npm/v/ai-engineering-workflow.svg"></a>
+  <a href="https://github.com/PercivalLin/vibe-engineering/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PercivalLin/vibe-engineering/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://www.npmjs.com/package/vibe-engineering"><img alt="npm" src="https://img.shields.io/npm/v/vibe-engineering.svg"></a>
   <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <img alt="Node.js 20+" src="https://img.shields.io/badge/node-20%2B-339933.svg">
   <img alt="MCP" src="https://img.shields.io/badge/MCP-server-6f42c1.svg">
@@ -26,7 +26,7 @@
 
 ---
 
-AI Engineering Workflow is an agent-neutral MCP runtime for organizing Codex, Claude Code, Cursor, Gemini CLI, and similar tools into a disciplined engineering workflow.
+Vibe Engineering is an agent-neutral MCP runtime for organizing Codex, Claude Code, Cursor, Gemini CLI, and similar tools into a disciplined engineering workflow.
 
 It does not replace coding agents. It gives them the process around coding:
 
@@ -48,23 +48,23 @@ This project provides the control plane for that work. The workflow runtime owns
 Install globally:
 
 ```bash
-npm install -g ai-engineering-workflow
-ai-engineering server
+npm install -g vibe-engineering
+vibe-engineering server
 ```
 
 Or run with `npx`:
 
 ```bash
-npx -y ai-engineering-workflow server
+npx -y vibe-engineering server
 ```
 
 From source:
 
 ```bash
-git clone https://github.com/PercivalLin/ai-engineering-workflow.git
-cd ai-engineering-workflow
+git clone https://github.com/PercivalLin/vibe-engineering.git
+cd vibe-engineering
 npm run verify
-node ./bin/ai-engineering.mjs server
+node ./bin/vibe-engineering.mjs server
 ```
 
 Requires Node.js 20 or newer.
@@ -76,11 +76,11 @@ Using npm:
 ```json
 {
   "mcpServers": {
-    "ai-engineering-workflow": {
+    "vibe-engineering": {
       "command": "npx",
-      "args": ["-y", "ai-engineering-workflow", "server"],
+      "args": ["-y", "vibe-engineering", "server"],
       "env": {
-        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
       }
     }
   }
@@ -92,18 +92,18 @@ Using a local checkout:
 ```json
 {
   "mcpServers": {
-    "ai-engineering-workflow": {
+    "vibe-engineering": {
       "command": "node",
-      "args": ["/absolute/path/to/ai-engineering-workflow/bin/ai-engineering.mjs", "server"],
+      "args": ["/absolute/path/to/vibe-engineering/bin/vibe-engineering.mjs", "server"],
       "env": {
-        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
       }
     }
   }
 }
 ```
 
-`AI_ENGINEERING_HOME` is optional. By default, global memory is stored in `~/.ai-engineering`.
+`VIBE_ENGINEERING_HOME` is optional. By default, global memory is stored in `~/.vibe-engineering`.
 
 ## First Workflow Call
 
@@ -142,14 +142,14 @@ The workflow adapts the next execution role to the task type. Implementation wor
 Project-local workflow data is written to the target repository:
 
 ```text
-<target-project>/.ai-engineering/
+<target-project>/.vibe-engineering/
 <target-project>/docs/ai-artifacts/
 ```
 
 Global memory is written to:
 
 ```text
-~/.ai-engineering/
+~/.vibe-engineering/
 ```
 
 These logs can contain sensitive project details. Review them before sharing.

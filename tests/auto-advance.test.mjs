@@ -96,7 +96,7 @@ test("advance_workflow can auto-plan and record artifacts until external impleme
     const requirements = await readFile(join(fixture.projectRoot, "docs", "ai-artifacts", "requirements", result.actions.find((action) => action.artifact_type === "requirements").result.id + ".md"), "utf8");
     assert.match(requirements, /Success Criteria/);
 
-    const trace = await readJsonl(join(fixture.projectRoot, ".ai-engineering", "trace-ledger.jsonl"));
+    const trace = await readJsonl(join(fixture.projectRoot, ".vibe-engineering", "trace-ledger.jsonl"));
     assert.ok(trace.some((event) => event.type === "workflow_advanced" && event.status === "external_agent_required"));
     assert.ok(trace.some((event) => event.type === "backlog_recorded"));
 

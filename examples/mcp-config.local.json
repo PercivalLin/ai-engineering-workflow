@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "ai-engineering-workflow": {
+    "vibe-engineering": {
       "command": "node",
-      "args": ["/absolute/path/to/ai-engineering-workflow/bin/ai-engineering.mjs", "server"],
+      "args": ["/absolute/path/to/vibe-engineering/bin/vibe-engineering.mjs", "server"],
       "env": {
-        "AI_ENGINEERING_HOME": "/Users/you/.ai-engineering"
+        "VIBE_ENGINEERING_HOME": "/Users/you/.vibe-engineering"
       }
     }
   }

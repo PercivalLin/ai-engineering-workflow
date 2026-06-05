@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-engineering.local/schemas/changeset.schema.json",
+  "$id": "https://vibe-engineering.local/schemas/changeset.schema.json",
   "title": "AI Engineering ChangeSet",
   "type": "object",
   "required": [

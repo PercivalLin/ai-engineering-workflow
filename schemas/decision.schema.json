@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-engineering.local/schemas/decision.schema.json",
+  "$id": "https://vibe-engineering.local/schemas/decision.schema.json",
   "title": "AI Engineering User Decision",
   "type": "object",
   "required": [

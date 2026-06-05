@@ -47,7 +47,7 @@ npm run ci
 
 Runtime output is intentionally ignored:
 
-- `.ai-engineering/`
+- `.vibe-engineering/`
 - `docs/ai-artifacts/`
 
 This keeps generated project traces out of the tool source repository while still allowing target projects to choose whether they want to commit their own audit artifacts.

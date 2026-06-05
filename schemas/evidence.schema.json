@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-engineering.local/schemas/evidence.schema.json",
+  "$id": "https://vibe-engineering.local/schemas/evidence.schema.json",
   "title": "AI Engineering Evidence",
   "type": "object",
   "required": ["evidence_id", "evidence_type", "outcome", "timestamp", "hash"],

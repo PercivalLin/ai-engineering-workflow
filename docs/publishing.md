@@ -12,7 +12,7 @@ Use this checklist when preparing a GitHub release or npm publish.
 - Runtime output is ignored:
 
 ```text
-.ai-engineering/
+.vibe-engineering/
 docs/ai-artifacts/
 ```
 
@@ -24,19 +24,19 @@ After creating the public repository, update `package.json` with real URLs:
 {
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<owner>/ai-engineering-workflow.git"
+    "url": "git+https://github.com/<owner>/vibe-engineering.git"
   },
   "bugs": {
-    "url": "https://github.com/<owner>/ai-engineering-workflow/issues"
+    "url": "https://github.com/<owner>/vibe-engineering/issues"
   },
-  "homepage": "https://github.com/<owner>/ai-engineering-workflow#readme"
+  "homepage": "https://github.com/<owner>/vibe-engineering#readme"
 }
 ```
 
 Then push:
 
 ```bash
-git remote add origin git@github.com:<owner>/ai-engineering-workflow.git
+git remote add origin git@github.com:<owner>/vibe-engineering.git
 git push -u origin main
 ```
 
@@ -45,7 +45,7 @@ git push -u origin main
 Check package name availability:
 
 ```bash
-npm view ai-engineering-workflow version
+npm view vibe-engineering version
 ```
 
 An npm 404 usually means the package name is not currently published.
@@ -89,8 +89,8 @@ This project sets `publishConfig.registry` to `https://registry.npmjs.org/` to a
 After publishing:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 Then create a GitHub release using the notes in `CHANGELOG.md`.

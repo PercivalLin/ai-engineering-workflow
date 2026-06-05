@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve AI Engineering Workflow.
+Thanks for helping improve Vibe Engineering.
 
 The project is intentionally small and dependency-light. Changes should make the workflow more reliable, traceable, and useful across agent harnesses without binding the runtime to one model provider.
 
@@ -56,4 +56,4 @@ goal -> requirement -> decision -> task packet -> ChangeSet -> evidence -> revie
 - Avoid unrelated refactors.
 - Include tests for behavior changes.
 - Update `README.md`, `TESTING.md`, or schema docs when public behavior changes.
-- Do not commit generated `.ai-engineering/` runtime data unless a fixture explicitly needs it.
+- Do not commit generated `.vibe-engineering/` runtime data unless a fixture explicitly needs it.
