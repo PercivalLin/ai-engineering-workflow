@@ -153,3 +153,19 @@ Use `advance_workflow` as the normal entrypoint. The other tools are lower-level
 - records generated requirements, ADR, and backlog artifacts
 - dispatches the next execution role when code, verification, review, or learning needs an external agent
 - records every advancement in the trace ledger
+
+## Product Manager Prompt References
+
+The Product Manager role prompt in `src/core/defaults.mjs` is an original synthesis for this project. It does not vendor or copy complete third-party skill prompts. The design was informed by these public references:
+
+- [BMAD Method agents](https://docs.bmad-method.org/reference/agents/): the PM agent focuses on PRD workflows, epics/stories, implementation readiness, and course correction.
+- [aj-geddes product-manager skill](https://github.com/aj-geddes/claude-code-bmad-skills/tree/main/bmad-skills/product-manager): emphasizes PRD vs tech spec choice, functional and non-functional requirements, prioritization frameworks, testable acceptance criteria, and traceability.
+- [Product-Manager-Skills](https://github.com/deanpeters/Product-Manager-Skills): provides an agent-agnostic PM skill set and usage patterns across Claude Code, Codex, ChatGPT, and other agent harnesses.
+- [Anthropic guide to building skills](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf): influenced the progressive-disclosure shape: concise role metadata first, detailed role guidance only inside the role task packet.
+
+Adaptation notes:
+
+- We use MoSCoW as the default prioritization language because it is compact for autonomous planning.
+- RICE is included only when comparable reach, impact, confidence, and effort inputs are available.
+- The PM role is forbidden from prescribing low-level implementation details unless they are already project constraints.
+- The PM handoff must remain traceable from product goal to requirements, stories, acceptance criteria, backlog, tests, evidence, and ChangeSets.

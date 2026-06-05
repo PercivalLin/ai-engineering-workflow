@@ -52,6 +52,16 @@ test("runs the core workflow and exports an audit bundle", async () => {
   assert.equal(roleAction.role, "developer");
   assert.ok(roleAction.prompt_ref);
 
+  const pmRoleAction = await getRoleAction(projectRoot, {
+    role: "pm",
+    objective: "Shape product requirements"
+  });
+  assert.equal(pmRoleAction.ok, true);
+  assert.match(pmRoleAction.packet.role_prompt, /Product Manager for the AI virtual engineering team/);
+  assert.ok(pmRoleAction.packet.role_principles.some((item) => item.includes("User value")));
+  assert.ok(pmRoleAction.packet.artifact_contract.includes("Functional requirements with stable IDs and priorities"));
+  assert.ok(pmRoleAction.packet.quality_bar.some((item) => item.includes("acceptance criteria")));
+
   const artifact = await recordArtifact(projectRoot, {
     artifact_type: "adr",
     role: "architect",

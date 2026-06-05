@@ -613,6 +613,11 @@ function buildRolePacket({ state, role, roleDef, context, memory, objective }) {
     role,
     role_title: roleDef.title,
     mission: roleDef.mission,
+    role_prompt: roleDef.prompt || "",
+    role_principles: roleDef.principles || [],
+    decision_frameworks: roleDef.decision_frameworks || [],
+    artifact_contract: roleDef.artifact_contract || [],
+    quality_bar: roleDef.quality_bar || [],
     objective: objective || goal?.title || state.current_phase,
     goal,
     required_inputs: roleDef.inputs,
@@ -661,6 +666,36 @@ function renderRolePacketMarkdown(packet) {
     "",
     packet.mission,
     "",
+    ...(packet.role_prompt ? [
+      "## Role Prompt",
+      "",
+      packet.role_prompt,
+      ""
+    ] : []),
+    ...(packet.role_principles.length ? [
+      "## Role Principles",
+      "",
+      ...packet.role_principles.map((item) => `- ${item}`),
+      ""
+    ] : []),
+    ...(packet.decision_frameworks.length ? [
+      "## Decision Frameworks",
+      "",
+      ...packet.decision_frameworks.map((item) => `- ${item}`),
+      ""
+    ] : []),
+    ...(packet.artifact_contract.length ? [
+      "## Artifact Contract",
+      "",
+      ...packet.artifact_contract.map((item) => `- ${item}`),
+      ""
+    ] : []),
+    ...(packet.quality_bar.length ? [
+      "## Quality Bar",
+      "",
+      ...packet.quality_bar.map((item) => `- ${item}`),
+      ""
+    ] : []),
     "## Objective",
     "",
     packet.objective || "_No objective provided._",
