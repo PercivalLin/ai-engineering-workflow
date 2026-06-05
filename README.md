@@ -154,13 +154,22 @@ Use `advance_workflow` as the normal entrypoint. The other tools are lower-level
 - dispatches the next execution role when code, verification, review, or learning needs an external agent
 - records every advancement in the trace ledger
 
-## Product Manager Prompt References
+## Role Prompt References
 
-The Product Manager role prompt in `src/core/defaults.mjs` is an original synthesis for this project. It does not vendor or copy complete third-party skill prompts. The design was informed by these public references:
+The role prompts in `src/core/defaults.mjs` are original syntheses for this project. They do not vendor or copy complete third-party skill prompts. The design was informed by these public references:
 
-- [BMAD Method agents](https://docs.bmad-method.org/reference/agents/): the PM agent focuses on PRD workflows, epics/stories, implementation readiness, and course correction.
-- [aj-geddes product-manager skill](https://github.com/aj-geddes/claude-code-bmad-skills/tree/main/bmad-skills/product-manager): emphasizes PRD vs tech spec choice, functional and non-functional requirements, prioritization frameworks, testable acceptance criteria, and traceability.
-- [Product-Manager-Skills](https://github.com/deanpeters/Product-Manager-Skills): provides an agent-agnostic PM skill set and usage patterns across Claude Code, Codex, ChatGPT, and other agent harnesses.
+- [BMAD Method agents](https://docs.bmad-method.org/reference/agents/): informed the multi-role agent model, including PM, Architect, Developer, Scrum/Delivery-style planning, QA, and implementation readiness workflows.
+- [BMAD named agents](https://docs.bmad-method.org/explanation/named-agents/): informed phase-anchored role identity, role customization, and reducing user cognitive load through named agents.
+- [aj-geddes product-manager skill](https://github.com/aj-geddes/claude-code-bmad-skills/tree/main/bmad-skills/product-manager): informed PM requirements discipline around PRD vs tech spec choice, functional/non-functional requirements, prioritization, acceptance criteria, and traceability.
+- [Product-Manager-Skills](https://github.com/deanpeters/Product-Manager-Skills): informed agent-agnostic skill packaging and PM workflow structure across multiple AI coding harnesses.
+- [Google Engineering Practices](https://google.github.io/eng-practices/): informed Developer and Reviewer guidance around small changes, tests, code health, and review standards.
+- [The Kanban Guide](https://kanbanguides.org/english/): informed Delivery Manager guidance around visualizing work, WIP, explicit policies, flow, and continuous improvement.
+- [Scrum Guide](https://scrumguides.org/scrum-guide.html): informed delivery gates, Definition of Done, transparency, inspection, and adaptation language.
+- [Google SRE Book](https://sre.google/sre-book/): informed SRE/DevOps guidance around SLOs, release engineering, monitoring, rollback, incident readiness, and reliable release processes.
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/): informed Security role verification thinking for application security controls.
+- [NIST SSDF SP 800-218](https://csrc.nist.gov/pubs/sp/800/218/final): informed Security, Learning Coach, and Trace Auditor guidance around secure development practices and evidence.
+- [SLSA](https://slsa.dev/spec/v1.0/levels): informed Trace Auditor and SRE supply-chain/provenance language.
+- [Google developer documentation style guide](https://developers.google.com/style/): informed Writer guidance around clear, consistent, accessible developer documentation.
 - [Anthropic guide to building skills](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf): influenced the progressive-disclosure shape: concise role metadata first, detailed role guidance only inside the role task packet.
 
 Adaptation notes:
@@ -168,4 +177,5 @@ Adaptation notes:
 - We use MoSCoW as the default prioritization language because it is compact for autonomous planning.
 - RICE is included only when comparable reach, impact, confidence, and effort inputs are available.
 - The PM role is forbidden from prescribing low-level implementation details unless they are already project constraints.
-- The PM handoff must remain traceable from product goal to requirements, stories, acceptance criteria, backlog, tests, evidence, and ChangeSets.
+- All roles must preserve traceability from product goal to requirements, stories, acceptance criteria, backlog, implementation, tests, evidence, review, release, learning, and ChangeSets.
+- Role prompts are not meant to replace the workflow gates; they tell each role how to produce evidence that the gates can verify.
