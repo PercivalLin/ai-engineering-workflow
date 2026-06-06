@@ -1,5 +1,6 @@
 import { join, relative } from "node:path";
 import { execFile } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { appendDecisionEvent, appendTraceEvent, initProject, readProjectState } from "./project.mjs";
 import { appendJsonl, ensureDir, exists, hashObject, hashText, listFiles, newId, nowIso, readJson, readJsonl, writeJson, writeText } from "./fs-utils.mjs";
@@ -17,21 +18,53 @@ async function tryGit(projectRoot, args) {
 }
 
 async function currentDiff(projectRoot) {
-  const diff = await tryGit(projectRoot, ["diff", "--binary"]);
-  if (diff !== null) return diff;
+  const diff = await tryGit(projectRoot, ["diff", "--binary", "HEAD", "--"]);
+  const untracked = await untrackedFileDiff(projectRoot);
+  if (diff !== null) return `${diff}${untracked}`;
   const files = await listFiles(projectRoot, { maxFiles: 3000, maxDepth: 8 });
   return `No git diff available. Working tree snapshot files:\n${files.map((file) => relative(projectRoot, file)).join("\n")}\n`;
 }
 
+async function untrackedFileDiff(projectRoot) {
+  const stdout = await tryGit(projectRoot, ["ls-files", "--others", "--exclude-standard"]);
+  if (!stdout) return "";
+  const files = stdout
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .filter((file) => !isRuntimePath(file));
+  const chunks = [];
+  for (const file of files) {
+    try {
+      const content = await readFile(join(projectRoot, file), "utf8");
+      chunks.push([
+        `diff --git a/${file} b/${file}`,
+        "new file mode 100644",
+        "index 0000000..0000000",
+        "--- /dev/null",
+        `+++ b/${file}`,
+        ...content.split(/\r?\n/).map((line) => `+${line}`)
+      ].join("\n"));
+    } catch {
+      chunks.push([
+        `diff --git a/${file} b/${file}`,
+        "new file mode 100644",
+        `Binary files /dev/null and b/${file} differ`
+      ].join("\n"));
+    }
+  }
+  return chunks.length ? `${chunks.join("\n")}\n` : "";
+}
+
 async function changedFiles(projectRoot, fallback = []) {
-  if (fallback.length > 0) return fallback;
-  const status = await tryGit(projectRoot, ["status", "--short"]);
+  if (fallback.length > 0) return filterRuntimeFiles(fallback);
+  const status = await tryGit(projectRoot, ["status", "--short", "--untracked-files=all"]);
   if (!status) return [];
   return status
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => line.slice(3).trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((file) => !isRuntimePath(file));
 }
 
 export async function recordChangeset(projectRoot, input = {}) {
@@ -40,10 +73,23 @@ export async function recordChangeset(projectRoot, input = {}) {
   await ensureDir(paths.changesets);
   const state = await readProjectState(projectRoot);
   const inferredRefs = await inferLatestTaskPacketRefs(paths, state, input);
-  const diff = input.diff || await currentDiff(projectRoot);
+  const diff = Object.hasOwn(input, "diff") ? input.diff : await currentDiff(projectRoot);
   const diffHash = input.diff_hash || hashText(diff);
   const changeId = input.change_id || newId("change");
   const filesChanged = await changedFiles(projectRoot, input.files_changed || input.filesChanged || []);
+  const evidenceRefs = input.evidence_refs || input.evidenceRefs || [];
+  const evidenceValidation = await validateEvidenceRefs(projectRoot, evidenceRefs, {
+    task_id: input.task_id || state.active_task_id,
+    require_passing: true
+  });
+  if (evidenceRefs.length > 0 && !evidenceValidation.ok) {
+    return {
+      ok: false,
+      blocked: true,
+      reason: "ChangeSet evidence_refs must point to passing evidence records for the same task.",
+      findings: evidenceValidation.findings
+    };
+  }
   const change = {
     change_id: changeId,
     task_id: input.task_id || state.active_task_id,
@@ -57,7 +103,7 @@ export async function recordChangeset(projectRoot, input = {}) {
     diff_hash: diffHash,
     commands_run: input.commands_run || input.commandsRun || [],
     tests_run: input.tests_run || input.testsRun || [],
-    evidence_refs: input.evidence_refs || input.evidenceRefs || [],
+    evidence_refs: evidenceRefs,
     review_refs: input.review_refs || input.reviewRefs || [],
     risk_level: input.risk_level || input.riskLevel || "medium",
     rollback_plan: input.rollback_plan || input.rollbackPlan || "Revert this ChangeSet patch or restore affected files from version control.",
@@ -159,6 +205,57 @@ export async function recordEvidence(projectRoot, input = {}) {
     ok: true,
     evidence,
     file: evidenceFile
+  };
+}
+
+export async function validateEvidenceRefs(projectRoot, refs = [], input = {}) {
+  const normalizedRefs = Array.isArray(refs) ? refs : [];
+  const paths = projectPaths(projectRoot);
+  const evidence = await loadEvidenceRecords(paths);
+  return validateEvidenceRefsAgainstRecords(evidence, normalizedRefs, input);
+}
+
+export function validateEvidenceRefsAgainstRecords(evidence = [], refs = [], input = {}) {
+  const taskId = input.task_id || input.taskId || null;
+  const requirePassing = Boolean(input.require_passing || input.requirePassing);
+  const allowedOutcomes = input.allowed_outcomes || input.allowedOutcomes || ["passed", "approved"];
+  const findings = [];
+  for (const ref of refs || []) {
+    const record = evidence.find((item) => item.evidence_id === ref);
+    if (!record) {
+      findings.push({ evidence_ref: ref, issue: "Evidence ref does not exist" });
+      continue;
+    }
+    if (taskId && record.task_id !== taskId) {
+      findings.push({ evidence_ref: ref, issue: "Evidence ref belongs to a different task" });
+    }
+    if (requirePassing && !allowedOutcomes.includes(record.outcome)) {
+      findings.push({ evidence_ref: ref, issue: `Evidence outcome is not passing: ${record.outcome || "unknown"}` });
+    }
+  }
+  return {
+    ok: findings.length === 0,
+    findings
+  };
+}
+
+export async function validateChangesetTrace(projectRoot, change, evidence = []) {
+  const findings = [];
+  addChangesetFieldFindings(findings, change);
+  const evidenceValidation = validateEvidenceRefsAgainstRecords(evidence, change.evidence_refs || [], {
+    task_id: change.task_id,
+    require_passing: true
+  });
+  for (const finding of evidenceValidation.findings) {
+    findings.push({ change_id: change.change_id, issue: finding.issue, evidence_ref: finding.evidence_ref });
+  }
+  if (change.files_changed?.length) {
+    const patch = await readPatch(projectPaths(projectRoot), change.change_id);
+    if (patch !== null && patch.trim().length === 0) findings.push({ change_id: change.change_id, issue: "Empty patch for changed files" });
+  }
+  return {
+    ok: findings.length === 0,
+    findings
   };
 }
 
@@ -269,14 +366,12 @@ export async function exportAuditBundle(projectRoot, input = {}) {
   const artifacts = await listFiles(paths.docsRoot, { maxDepth: 4, maxFiles: 5000, ignore: [] });
   const evidence = [];
   const changesets = [];
-  for (const file of evidenceFiles.filter((file) => file.endsWith(".json"))) {
-    evidence.push(await readJson(file));
-  }
+  for (const file of evidenceFiles.filter((file) => file.endsWith(".json"))) evidence.push(await readJson(file));
   for (const file of changesetFiles.filter((file) => file.endsWith(".json"))) {
     changesets.push(await readJson(file));
   }
 
-  const traceability = buildTraceability({ state, trace, decisions, evidence, changesets });
+  const traceability = await buildTraceability({ state, trace, decisions, evidence, changesets, paths });
   const bundle = {
     bundle_id: newId("audit"),
     task_id: taskId,
@@ -324,7 +419,7 @@ export async function exportAuditBundle(projectRoot, input = {}) {
   };
 }
 
-function buildTraceability({ state, trace, decisions, evidence, changesets }) {
+async function buildTraceability({ state, trace, decisions, evidence, changesets, paths }) {
   const requirements = [];
   for (const goal of state.goals || []) {
     requirements.push({
@@ -354,23 +449,71 @@ function buildTraceability({ state, trace, decisions, evidence, changesets }) {
   return {
     requirements,
     files: byFile,
-    missing_trace_findings: findMissingTrace(changesets)
+    missing_trace_findings: await findMissingTrace(changesets, evidence, paths)
   };
 }
 
-function findMissingTrace(changesets) {
+async function findMissingTrace(changesets, evidence, paths) {
   const findings = [];
   for (const change of changesets) {
-    if (!change.task_id) findings.push({ change_id: change.change_id, issue: "Missing task_id" });
-    if (!change.diff_hash) findings.push({ change_id: change.change_id, issue: "Missing diff_hash" });
-    if (!change.agent) findings.push({ change_id: change.change_id, issue: "Missing agent" });
-    if (!change.prompt_ref) findings.push({ change_id: change.change_id, issue: "Missing prompt_ref" });
-    if (!change.context_ref) findings.push({ change_id: change.change_id, issue: "Missing context_ref" });
-    if (!change.files_changed || change.files_changed.length === 0) findings.push({ change_id: change.change_id, issue: "Missing files_changed" });
-    if (!change.evidence_refs || change.evidence_refs.length === 0) findings.push({ change_id: change.change_id, issue: "Missing evidence_refs" });
-    if (!change.rollback_plan) findings.push({ change_id: change.change_id, issue: "Missing rollback_plan" });
+    addChangesetFieldFindings(findings, change);
+    const evidenceValidation = validateEvidenceRefsAgainstRecords(evidence, change.evidence_refs || [], {
+      task_id: change.task_id,
+      require_passing: true
+    });
+    for (const finding of evidenceValidation.findings) {
+      findings.push({ change_id: change.change_id, issue: finding.issue, evidence_ref: finding.evidence_ref });
+    }
+    if (change.files_changed?.length && paths) {
+      const patch = await readPatch(paths, change.change_id);
+      if (patch !== null && patch.trim().length === 0) findings.push({ change_id: change.change_id, issue: "Empty patch for changed files" });
+    }
   }
   return findings;
+}
+
+function addChangesetFieldFindings(findings, change) {
+  if (!change.task_id) findings.push({ change_id: change.change_id, issue: "Missing task_id" });
+  if (!change.diff_hash) findings.push({ change_id: change.change_id, issue: "Missing diff_hash" });
+  if (!change.agent) findings.push({ change_id: change.change_id, issue: "Missing agent" });
+  if (!change.prompt_ref) findings.push({ change_id: change.change_id, issue: "Missing prompt_ref" });
+  if (!change.context_ref) findings.push({ change_id: change.change_id, issue: "Missing context_ref" });
+  if (!change.files_changed || change.files_changed.length === 0) findings.push({ change_id: change.change_id, issue: "Missing files_changed" });
+  if (!change.evidence_refs || change.evidence_refs.length === 0) findings.push({ change_id: change.change_id, issue: "Missing evidence_refs" });
+  if (!change.rollback_plan) findings.push({ change_id: change.change_id, issue: "Missing rollback_plan" });
+}
+
+async function loadEvidenceRecords(paths) {
+  try {
+    const files = await listFiles(paths.evidence, { maxDepth: 1, maxFiles: 5000, ignore: [] });
+    const records = [];
+    for (const file of files.filter((item) => item.endsWith(".json"))) records.push(await readJson(file));
+    return records;
+  } catch {
+    return [];
+  }
+}
+
+async function readPatch(paths, changeId) {
+  try {
+    return await readFile(join(paths.changesets, `${changeId}.patch`), "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function filterRuntimeFiles(files) {
+  return files.filter((file) => !isRuntimePath(file));
+}
+
+function isRuntimePath(file) {
+  const normalized = String(file || "").replace(/\\/g, "/");
+  return normalized === ".agentwolf"
+    || normalized === ".ai-engineering"
+    || normalized === "docs/ai-artifacts"
+    || normalized.startsWith(".agentwolf/")
+    || normalized.startsWith(".ai-engineering/")
+    || normalized.startsWith("docs/ai-artifacts/");
 }
 
 function normalizeArtifactType(type) {

@@ -1,7 +1,7 @@
 import { basename, join } from "node:path";
 import { DEFAULT_ANTI_PATTERNS, DEFAULT_PLAYBOOKS, DEFAULT_PRINCIPLES, DEFAULT_ROLE_CHECKLISTS } from "./defaults.mjs";
 import { appendJsonl, ensureDir, exists, hashObject, newId, nowIso, readJson, writeJson, writeText, listFiles } from "./fs-utils.mjs";
-import { globalPaths } from "./paths.mjs";
+import { globalPaths, projectPaths } from "./paths.mjs";
 import { appendTraceEvent } from "./project.mjs";
 
 const DEFAULT_GROUPS = [
@@ -160,6 +160,17 @@ export async function proposeLearning(projectRoot, input = {}) {
       reason: "Learning proposals must reference real evidence such as tests, review comments, failures, incidents, or delivery metrics."
     };
   }
+  if (projectRoot) {
+    const evidenceValidation = await validateLearningEvidence(projectRoot, evidenceRefs, input.task_id || input.taskId || null);
+    if (!evidenceValidation.ok) {
+      return {
+        ok: false,
+        blocked: true,
+        reason: "Learning proposals must reference real passing evidence records.",
+        findings: evidenceValidation.findings
+      };
+    }
+  }
 
   const paths = await ensureGlobalMemory();
   const id = input.id || newId("learning");
@@ -220,6 +231,37 @@ export async function proposeLearning(projectRoot, input = {}) {
     ok: true,
     learning: record,
     files: [file, caseMd]
+  };
+}
+
+async function validateLearningEvidence(projectRoot, refs, taskId) {
+  const paths = projectPaths(projectRoot);
+  const files = await listFiles(paths.evidence, { maxDepth: 1, maxFiles: 5000, ignore: [] });
+  const evidence = [];
+  for (const file of files.filter((item) => item.endsWith(".json"))) {
+    try {
+      evidence.push(await readJson(file));
+    } catch {
+      // Ignore malformed evidence here; missing refs below will block promotion.
+    }
+  }
+  const findings = [];
+  for (const ref of refs) {
+    const record = evidence.find((item) => item.evidence_id === ref);
+    if (!record) {
+      findings.push({ evidence_ref: ref, issue: "Evidence ref does not exist" });
+      continue;
+    }
+    if (taskId && record.task_id !== taskId) {
+      findings.push({ evidence_ref: ref, issue: "Evidence ref belongs to a different task" });
+    }
+    if (!["passed", "approved"].includes(record.outcome)) {
+      findings.push({ evidence_ref: ref, issue: `Evidence outcome is not passing: ${record.outcome || "unknown"}` });
+    }
+  }
+  return {
+    ok: findings.length === 0,
+    findings
   };
 }
 

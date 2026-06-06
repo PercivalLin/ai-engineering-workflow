@@ -36,7 +36,7 @@ flowchart LR
 
 The MCP server is the primary entrypoint. It exposes tools such as `advance_workflow`, `get_role_action`, `dispatch_agent_task`, `record_changeset`, `record_evidence`, and `export_audit_bundle`.
 
-The server is implemented directly over stdio JSON-RPC to keep the runtime portable and dependency-light.
+The server is implemented directly over stdio JSON-RPC to keep the runtime portable and dependency-light. The current public surface is the legacy stdio tools capability; resources, prompts, elicitation, progress, cancellation, and Streamable HTTP are future adapter work rather than current protocol claims.
 
 ### Workflow Runtime
 

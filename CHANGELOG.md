@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning once published.
 
+## 0.1.2 - 2026-06-06
+
+### Fixed
+
+- Require ChangeSet `evidence_refs` to point to existing passing evidence records for the same task.
+- Scope verification, review, requirements, architecture, and release gates to the active task.
+- Block failed, stale, or cross-task evidence from passing verification and review gates.
+- Capture staged Git changes and untracked files in ChangeSet patch snapshots.
+- Filter AgentWolf runtime output from inferred `files_changed`.
+- Report invalid evidence refs and empty patches in audit bundle trace findings.
+- Return only the MCP protocol version actually supported by this stdio tools server.
+
 ## 0.1.1 - 2026-06-05
 
 ### Fixed

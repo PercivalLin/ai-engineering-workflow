@@ -60,7 +60,7 @@ Examples:
 
 - Requirements gate blocks if there are no testable acceptance criteria.
 - Architecture gate blocks if high-risk API, migration, or data decisions are unresolved.
-- Build gate blocks if a code change has no ChangeSet.
-- Verification gate blocks if evidence is missing.
-- Review gate blocks if blocking findings are unresolved.
+- Build gate blocks if a code change has no task-scoped ChangeSet with valid evidence refs and rollback context.
+- Verification gate blocks if the active task has no passing test, scan, security, or QA evidence.
+- Review gate blocks if the active task has no passing or approved review evidence.
 - Archive gate blocks if the audit bundle cannot reconstruct decisions, changes, evidence, and rollback.

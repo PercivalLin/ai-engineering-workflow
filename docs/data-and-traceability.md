@@ -71,6 +71,8 @@ Every code modification should be recorded as a ChangeSet with:
 - rollback plan
 - timestamp
 
+Evidence refs must resolve to evidence records for the same task. Evidence used to satisfy build, verification, review, or learning gates must have a passing or approved outcome. Audit bundles flag missing refs, cross-task refs, failed evidence, missing files, and empty patch snapshots.
+
 ## Inspection Commands
 
 ```bash

@@ -1,11 +1,12 @@
 import { join } from "node:path";
+import { readFile } from "node:fs/promises";
 import { PHASE_OWNER, ROLES, WORKFLOW_PHASES } from "./defaults.mjs";
 import { hashObject, newId, nowIso, readJson, readJsonl, writeJson, writeText } from "./fs-utils.mjs";
 import { retrieveGlobalExperience } from "./memory.mjs";
 import { scanProjectContext } from "./context.mjs";
 import { appendDecisionEvent, appendTraceEvent, createGoal, initProject, readProjectState, writeProjectState } from "./project.mjs";
 import { projectPaths } from "./paths.mjs";
-import { exportAuditBundle, recordArtifact, recordBacklog } from "./trace.mjs";
+import { exportAuditBundle, recordArtifact, recordBacklog, validateChangesetTrace } from "./trace.mjs";
 
 export async function advanceWorkflow(projectRoot, input = {}) {
   await initProject(projectRoot);
@@ -581,8 +582,8 @@ export async function runGate(projectRoot, input = {}) {
   const decisions = await readJsonl(paths.decisionLog);
   const evidence = await loadEvidence(paths);
   const changesets = await loadChangesets(paths);
-  const artifacts = await listArtifactNames(paths);
-  const findings = gateFindings({ phase, state, trace, decisions, evidence, changesets, artifacts });
+  const artifacts = await listArtifacts(paths);
+  const findings = await gateFindings({ projectRoot, phase, state, trace, decisions, evidence, changesets, artifacts });
   const passed = findings.every((finding) => finding.severity !== "blocker");
   let next_phase = state.current_phase;
 
@@ -1175,16 +1176,41 @@ async function loadChangesets(paths) {
   return changesets;
 }
 
-async function listArtifactNames(paths) {
+async function listArtifacts(paths) {
   try {
     const { listFiles } = await import("./fs-utils.mjs");
-    return await listFiles(paths.docsRoot, { maxDepth: 4, maxFiles: 5000, ignore: [] });
+    const files = await listFiles(paths.docsRoot, { maxDepth: 4, maxFiles: 5000, ignore: [] });
+    const artifacts = [];
+    for (const file of files.filter((item) => item.endsWith(".md"))) {
+      artifacts.push({
+        file,
+        ...await readFrontMatter(file)
+      });
+    }
+    return artifacts;
   } catch {
     return [];
   }
 }
 
-function gateFindings({ phase, state, trace, decisions, evidence, changesets, artifacts }) {
+async function readFrontMatter(file) {
+  try {
+    const text = await readFile(file, "utf8");
+    const match = text.match(/^---\n([\s\S]*?)\n---/);
+    if (!match) return {};
+    const values = {};
+    for (const line of match[1].split(/\r?\n/)) {
+      const index = line.indexOf(":");
+      if (index < 0) continue;
+      values[line.slice(0, index).trim()] = line.slice(index + 1).trim();
+    }
+    return values;
+  } catch {
+    return {};
+  }
+}
+
+async function gateFindings({ projectRoot, phase, state, trace, decisions, evidence, changesets, artifacts }) {
   const findings = [];
   const goal = activeGoal(state);
   const work = classifyGoal(goal);
@@ -1203,10 +1229,10 @@ function gateFindings({ phase, state, trace, decisions, evidence, changesets, ar
   if (phase === "clarification_gate" && unresolved.length > 0) {
     findings.push(blocker(`There are ${unresolved.length} unresolved user decisions.`));
   }
-  if (phase === "requirements" && !artifacts.some((file) => file.includes("/requirements/"))) {
+  if (phase === "requirements" && !hasTaskArtifact(artifacts, state.active_task_id, ["requirements", "prd", "srs", "acceptance"])) {
     findings.push(blocker("Requirements artifact is missing."));
   }
-  if (phase === "architecture" && !artifacts.some((file) => file.includes("/adr/"))) {
+  if (phase === "architecture" && !hasTaskArtifact(artifacts, state.active_task_id, ["adr", "architecture", "design", "threat_model"])) {
     findings.push(blocker("Architecture ADR artifact is missing."));
   }
   if (phase === "planning" && (!state.backlog || state.backlog.length === 0)) {
@@ -1215,16 +1241,24 @@ function gateFindings({ phase, state, trace, decisions, evidence, changesets, ar
   if (phase === "build_loop" && work.requires_changes && taskChangesets.length === 0) {
     findings.push(blocker("No ChangeSet has been recorded."));
   }
-  if (phase === "build_loop" && !work.requires_changes && taskEvidence.length === 0) {
+  if (phase === "build_loop" && work.requires_changes) {
+    for (const change of taskChangesets) {
+      const validation = await validateChangesetTrace(projectRoot, change, evidence);
+      for (const finding of validation.findings) {
+        findings.push(blocker(`Weak ChangeSet ${change.change_id}: ${finding.issue}`));
+      }
+    }
+  }
+  if (phase === "build_loop" && !work.requires_changes && !hasPassingEvidence(taskEvidence, ["review", "manual", "qa", "scan", "test", "security"])) {
     findings.push(blocker("No analysis evidence has been recorded for this read-only workflow task."));
   }
-  if (phase === "verification_loop" && !evidence.some((item) => ["test", "scan", "security", "qa"].includes(item.evidence_type))) {
+  if (phase === "verification_loop" && !hasPassingEvidence(taskEvidence, ["test", "scan", "security", "qa"])) {
     findings.push(blocker("Verification evidence is missing."));
   }
-  if (phase === "review_gate" && !evidence.some((item) => item.evidence_type === "review" && ["passed", "approved"].includes(item.outcome))) {
+  if (phase === "review_gate" && !hasPassingEvidence(taskEvidence, ["review"])) {
     findings.push(blocker("Passing review evidence is missing."));
   }
-  if (phase === "release_readiness" && !artifacts.some((file) => file.includes("/release/"))) {
+  if (phase === "release_readiness" && !hasTaskArtifact(artifacts, state.active_task_id, ["release", "changelog", "handoff", "deployment"])) {
     findings.push(blocker("Release readiness artifact is missing."));
   }
   if (phase === "retro_learn" && !trace.some((event) => event.type === "learning_proposed")) {
@@ -1235,6 +1269,17 @@ function gateFindings({ phase, state, trace, decisions, evidence, changesets, ar
   }
   if (findings.length === 0) findings.push({ severity: "info", message: "Gate passed." });
   return findings;
+}
+
+function hasPassingEvidence(evidence, types) {
+  return evidence.some((item) => types.includes(item.evidence_type) && ["passed", "approved"].includes(item.outcome));
+}
+
+function hasTaskArtifact(artifacts, taskId, types) {
+  return artifacts.some((artifact) => {
+    if (!types.includes(artifact.artifact_type)) return false;
+    return !taskId || artifact.task_id === taskId;
+  });
 }
 
 function blocker(message) {

@@ -181,7 +181,7 @@ npm run ci
 
 ## Status
 
-Early alpha. The MCP runtime, role packets, trace ledger, gates, global memory, and audit bundle export are implemented. External adapters are currently task-packet based.
+Early alpha. The MCP runtime, role packets, trace ledger, task-scoped gates, evidence validation, global memory, and audit bundle export are implemented. External adapters are currently task-packet based, not full external-agent process supervisors.
 
 ## License
 

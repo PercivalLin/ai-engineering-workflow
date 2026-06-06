@@ -1,6 +1,6 @@
 {
   "name": "agentwolf",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Agent-neutral virtual engineering team runtime with workflow gates, global memory, and traceable ChangeSets.",
   "type": "module",
   "homepage": "https://github.com/PercivalLin/agentwolf#readme",

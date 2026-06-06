@@ -4,6 +4,8 @@ import { retrieveGlobalExperience, proposeLearning, promoteOrRollbackRule } from
 import { advanceWorkflow, askUserDecision, dispatchAgentTask, getRoleAction, recordUserDecision, runGate } from "./core/workflow.mjs";
 import { exportAuditBundle, recordArtifact, recordBacklog, recordChangeset, recordEvidence } from "./core/trace.mjs";
 
+const SUPPORTED_PROTOCOL_VERSION = "2024-11-05";
+
 const TOOLS = [
   {
     name: "advance_workflow",
@@ -260,11 +262,11 @@ async function handleLine(line, output) {
 async function handleRequest(request) {
   if (request.method === "initialize") {
     return {
-      protocolVersion: request.params?.protocolVersion || "2024-11-05",
+      protocolVersion: SUPPORTED_PROTOCOL_VERSION,
       capabilities: { tools: {} },
       serverInfo: {
         name: "agentwolf",
-        version: "0.1.1"
+        version: "0.1.2"
       }
     };
   }
